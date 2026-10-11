@@ -1,26 +1,31 @@
-# SSX reconstruction in Rust and Bevy
+<img src="assets/branding/ssx-icon.png" alt="SSX icon" width="400">
 
-## Status
+# SSX Reconstruction
 
-Figured id hop on the recon bandwagon. In its current state this is a recon of the core game loop and physics engine.
+This is a reconstruction of the PS2 game SSX in Rust and Bevy. The core game loop and physics are in place, but the project is still in progress.
 
-This recon was built using the PS2 .iso file.
+## How it’s made
+AI has effectively reduced the time spend needed for reversing binaries of this scale.
 
-### TODO
+I use Ghidra and IDA Pro to decompile and study the original software from a PS2 ISO. AI helps me interpret the results, trace how game systems work, and turn those findings into a Rust and Bevy implementation.
 
-- There are issues with clipping
-- There are issues with the camera
-- A number of world events need to be added
-- There are a number of features that need to be added such as the story mode and progression system
+This is a port built from that understanding. I aim to preserve how SSX plays, while making implementation choices that suit Rust, Bevy, and my own sense of how the game should feel.
+
+## Current limitations
+
+- Clipping and camera issues remain.
+- Several world events are missing.
+- Story mode, progression, and other features are still to come.
 
 ## Build
 
-Requires Git LFS assets (`git lfs pull`).
+Pull the Git LFS assets before building:
 
 ```powershell
+git lfs pull
 cargo build --release --locked --features viewer --bin ssx-play
 ```
 
 ## License
 
-The reconstruction source uses GPL-3.0-or-later. See `LICENSE`. Extracted game files are separate local inputs and are not covered by this source license.
+The reconstruction source uses GPL-3.0-or-later. See `LICENSE`. Extracted game files are separate local inputs and are not covered by the source license.
