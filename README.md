@@ -11,7 +11,8 @@ I use Ghidra and IDA Pro to decompile and study the original software from a PS2
 
 This is a port built from that understanding. I aim to preserve how SSX plays, while making implementation choices that suit Rust, Bevy, and my own sense of how the game should feel.
 
-[![There is a bit more to things than...](https://img.youtube.com/vi/mcYl70vq_Ns/hqdefault.jpg)](https://youtu.be/mcYl70vq_Ns)
+Asset creation and upscaling is made using the following process. 
+ [Play on YouTube](https://youtu.be/mcYl70vq_Ns)
 
 ## Current limitations
 
