@@ -1,0 +1,1482 @@
+[
+  {
+    "address": "00102358",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00102454) */"
+    ]
+  },
+  {
+    "address": "001037f0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00103824) */",
+      "/* WARNING: Type propagation algorithm not settling */",
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001065a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00106650) */"
+    ]
+  },
+  {
+    "address": "001067a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001068d8) */"
+    ]
+  },
+  {
+    "address": "00106ca0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00106e28) */"
+    ]
+  },
+  {
+    "address": "00107af0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00107b34) */"
+    ]
+  },
+  {
+    "address": "00109448",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001097f4) */",
+      "/* WARNING: Removing unreachable block (ram,0x00109840) */"
+    ]
+  },
+  {
+    "address": "00109c50",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00109c94) */"
+    ]
+  },
+  {
+    "address": "00109da8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00109dd8) */"
+    ]
+  },
+  {
+    "address": "0010f278",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0010f3cc) */",
+      "/* WARNING: Removing unreachable block (ram,0x0010f43c) */"
+    ]
+  },
+  {
+    "address": "00111c18",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00111c84) */"
+    ]
+  },
+  {
+    "address": "00115ae0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00115c38) */"
+    ]
+  },
+  {
+    "address": "00115fc8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0011606c) */"
+    ]
+  },
+  {
+    "address": "00116378",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0011678c) */",
+      "/* WARNING: Removing unreachable block (ram,0x00116488) */",
+      "/* WARNING: Removing unreachable block (ram,0x00116834) */"
+    ]
+  },
+  {
+    "address": "00116a28",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00116b48) */"
+    ]
+  },
+  {
+    "address": "001173e0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00117440) */",
+      "/* WARNING: Removing unreachable block (ram,0x0011746c) */"
+    ]
+  },
+  {
+    "address": "00117788",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001178d8) */",
+      "/* WARNING: Removing unreachable block (ram,0x0011791c) */"
+    ]
+  },
+  {
+    "address": "00117950",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001179fc) */"
+    ]
+  },
+  {
+    "address": "00118d08",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00118d50) */",
+      "/* WARNING: Removing unreachable block (ram,0x00118ea0) */"
+    ]
+  },
+  {
+    "address": "001196f0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001197bc) */"
+    ]
+  },
+  {
+    "address": "001198d8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00119bac) */"
+    ]
+  },
+  {
+    "address": "00119e38",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0011a9e4) */",
+      "/* WARNING: Removing unreachable block (ram,0x0011a328) */",
+      "/* WARNING: Removing unreachable block (ram,0x00119eb8) */",
+      "/* WARNING: Removing unreachable block (ram,0x0011a354) */",
+      "/* WARNING: Removing unreachable block (ram,0x0011aa10) */"
+    ]
+  },
+  {
+    "address": "0011aeb0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0011af30) */"
+    ]
+  },
+  {
+    "address": "0011b180",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0011b880) */"
+    ]
+  },
+  {
+    "address": "0011dc08",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0011dd40) */",
+      "/* WARNING: Removing unreachable block (ram,0x0011dc38) */",
+      "/* WARNING: Removing unreachable block (ram,0x0011ddc4) */"
+    ]
+  },
+  {
+    "address": "00120610",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00120700) */"
+    ]
+  },
+  {
+    "address": "001209f8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00120a44) */"
+    ]
+  },
+  {
+    "address": "00120f18",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00121048) */",
+      "/* WARNING: Removing unreachable block (ram,0x00120f58) */",
+      "/* WARNING: Removing unreachable block (ram,0x00120f84) */",
+      "/* WARNING: Removing unreachable block (ram,0x00121080) */"
+    ]
+  },
+  {
+    "address": "001211a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0012126c) */"
+    ]
+  },
+  {
+    "address": "001217d8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00121850) */",
+      "/* WARNING: Removing unreachable block (ram,0x0012182c) */",
+      "/* WARNING: Removing unreachable block (ram,0x00121910) */"
+    ]
+  },
+  {
+    "address": "00121c00",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00121c20) */"
+    ]
+  },
+  {
+    "address": "00121cb0",
+    "warnings": [
+      "/* WARNING: Switch with 1 destination removed at 0x00121d4c : 6 cases all go to same destination */"
+    ]
+  },
+  {
+    "address": "0012baf0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0012bb54) */"
+    ]
+  },
+  {
+    "address": "00131220",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00131304) */",
+      "/* WARNING: Removing unreachable block (ram,0x001312bc) */"
+    ]
+  },
+  {
+    "address": "00136a70",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00136ad8) */"
+    ]
+  },
+  {
+    "address": "00136af0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00136b40) */"
+    ]
+  },
+  {
+    "address": "00137050",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00137090) */"
+    ]
+  },
+  {
+    "address": "001375a0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00137624) */"
+    ]
+  },
+  {
+    "address": "00137d50",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00137d58) */"
+    ]
+  },
+  {
+    "address": "00137dd8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00137e54) */"
+    ]
+  },
+  {
+    "address": "00137fd0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00138078) */"
+    ]
+  },
+  {
+    "address": "00138540",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0013876c) */"
+    ]
+  },
+  {
+    "address": "001392a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0013940c) */",
+      "/* WARNING: Removing unreachable block (ram,0x001393c0) */"
+    ]
+  },
+  {
+    "address": "0013cce8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0013cd44) */"
+    ]
+  },
+  {
+    "address": "0013d320",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0013d344) */"
+    ]
+  },
+  {
+    "address": "0013d3c0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0013d3e4) */"
+    ]
+  },
+  {
+    "address": "00141778",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00141840) */",
+      "/* WARNING: Removing unreachable block (ram,0x001417f0) */"
+    ]
+  },
+  {
+    "address": "001446b8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001449a0) */",
+      "/* WARNING: Removing unreachable block (ram,0x00144b08) */",
+      "/* WARNING: Removing unreachable block (ram,0x00144944) */",
+      "/* WARNING: Removing unreachable block (ram,0x00144b64) */"
+    ]
+  },
+  {
+    "address": "00147438",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001471d4) */",
+      "/* WARNING: Removing unreachable block (ram,0x001471c4) */",
+      "/* WARNING: Removing unreachable block (ram,0x00147258) */",
+      "/* WARNING: Removing unreachable block (ram,0x00147274) */",
+      "/* WARNING: Removing unreachable block (ram,0x00147290) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472ac) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472c4) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472dc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472f4) */",
+      "/* WARNING: Removing unreachable block (ram,0x0014730c) */",
+      "/* WARNING: Removing unreachable block (ram,0x00147314) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472fc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472e4) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472cc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001472b4) */",
+      "/* WARNING: Removing unreachable block (ram,0x00147298) */",
+      "/* WARNING: Removing unreachable block (ram,0x0014727c) */",
+      "/* WARNING: Removing unreachable block (ram,0x00147260) */"
+    ]
+  },
+  {
+    "address": "00147b18",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00147bc8) */"
+    ]
+  },
+  {
+    "address": "001499e0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00149a2c) */"
+    ]
+  },
+  {
+    "address": "00149b98",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00149be0) */"
+    ]
+  },
+  {
+    "address": "00149c78",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00149cc4) */"
+    ]
+  },
+  {
+    "address": "0014a1c8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0014a290) */"
+    ]
+  },
+  {
+    "address": "0014a5c0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0014a688) */"
+    ]
+  },
+  {
+    "address": "0014abc8",
+    "warnings": [
+      "/* WARNING: Type propagation algorithm not settling */"
+    ]
+  },
+  {
+    "address": "001504a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001504e4) */",
+      "/* WARNING: Removing unreachable block (ram,0x001504ec) */",
+      "/* WARNING: Removing unreachable block (ram,0x00150540) */",
+      "/* WARNING: Type propagation algorithm not settling */",
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00154b78",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00154be8) */"
+    ]
+  },
+  {
+    "address": "00158808",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00158c1c) */"
+    ]
+  },
+  {
+    "address": "00158c78",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00158fdc) */"
+    ]
+  },
+  {
+    "address": "0015a5a0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0015a5e4) */"
+    ]
+  },
+  {
+    "address": "0015db48",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0015ddc0) */"
+    ]
+  },
+  {
+    "address": "00167648",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x00167678. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "00169348",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001693c4. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "0016b110",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0016f8f8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00170e30",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00170e8c) */"
+    ]
+  },
+  {
+    "address": "00173278",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0017aa20",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0017ada8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0017ae00) */"
+    ]
+  },
+  {
+    "address": "0017b170",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0017b2e0) */",
+      "/* WARNING: Removing unreachable block (ram,0x0017b710) */"
+    ]
+  },
+  {
+    "address": "0017cc58",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0017dee0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0017dfd4) */"
+    ]
+  },
+  {
+    "address": "0017efc8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0017f088) */"
+    ]
+  },
+  {
+    "address": "0017f1a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0017f38c) */"
+    ]
+  },
+  {
+    "address": "0017f848",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0017fc14) */",
+      "/* WARNING: Removing unreachable block (ram,0x0017fb60) */",
+      "/* WARNING: Removing unreachable block (ram,0x0017fe6c) */"
+    ]
+  },
+  {
+    "address": "00180178",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001806a8) */"
+    ]
+  },
+  {
+    "address": "001819e0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00181a1c) */",
+      "/* WARNING: Removing unreachable block (ram,0x00181a2c) */",
+      "/* WARNING: Removing unreachable block (ram,0x00181a80) */"
+    ]
+  },
+  {
+    "address": "00184250",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001843cc) */",
+      "/* WARNING: Removing unreachable block (ram,0x00184384) */",
+      "/* WARNING: Removing unreachable block (ram,0x001843bc) */"
+    ]
+  },
+  {
+    "address": "001851a8",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001851dc. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "0018ccb0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0018fbc0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0018fc58) */"
+    ]
+  },
+  {
+    "address": "00190930",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001909c0) */"
+    ]
+  },
+  {
+    "address": "00194de8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00195128) */"
+    ]
+  },
+  {
+    "address": "001957c8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00195924) */",
+      "/* WARNING: Removing unreachable block (ram,0x001959c0) */"
+    ]
+  },
+  {
+    "address": "00195d60",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00195d9c) */"
+    ]
+  },
+  {
+    "address": "00196d58",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00196d70) */"
+    ]
+  },
+  {
+    "address": "00196e20",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00196e44) */"
+    ]
+  },
+  {
+    "address": "00196f10",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00196f58) */",
+      "/* WARNING: Removing unreachable block (ram,0x00196fb0) */"
+    ]
+  },
+  {
+    "address": "00198af0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00198c24) */"
+    ]
+  },
+  {
+    "address": "0019ae30",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001a0d20",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001a0f18) */"
+    ]
+  },
+  {
+    "address": "001a1780",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001a1d88",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001a2650",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001a26f4) */"
+    ]
+  },
+  {
+    "address": "001a3d20",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001a8e10",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001a8ebc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001a8ec4) */"
+    ]
+  },
+  {
+    "address": "001a95b0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001a96bc) */"
+    ]
+  },
+  {
+    "address": "001aaed0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001aaf94) */"
+    ]
+  },
+  {
+    "address": "001ab130",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001ab1ec) */"
+    ]
+  },
+  {
+    "address": "001ab2f0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001abfc8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001aeb28",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001af8e8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001afb44) */",
+      "/* WARNING: Removing unreachable block (ram,0x001afb74) */"
+    ]
+  },
+  {
+    "address": "001b1c68",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b2888",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b37d8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b4168",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001b4374) */",
+      "/* WARNING: Removing unreachable block (ram,0x001b4250) */",
+      "/* WARNING: Removing unreachable block (ram,0x001b42a0) */",
+      "/* WARNING: Removing unreachable block (ram,0x001b43c0) */"
+    ]
+  },
+  {
+    "address": "001b48e8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b62a8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b6470",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b6618",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b67c0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b6968",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b6b10",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b6c40",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b6f30",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b7060",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001b9fd0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001ba174) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ba24c) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ba26c) */"
+    ]
+  },
+  {
+    "address": "001baaa8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001bb0fc) */"
+    ]
+  },
+  {
+    "address": "001be110",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001be6d8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001bed58",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001c2188",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001c2248) */"
+    ]
+  },
+  {
+    "address": "001c2850",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001c2de0) */",
+      "/* WARNING: Removing unreachable block (ram,0x001c2dc8) */"
+    ]
+  },
+  {
+    "address": "001c2f98",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001c2fbc. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "001c35d0",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001c35ec. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "001cb238",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001cb258. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "001cb7a0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001cba44) */",
+      "/* WARNING: Removing unreachable block (ram,0x001cba9c) */"
+    ]
+  },
+  {
+    "address": "001cca38",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001ccf1c) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ccf74) */",
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001ce890",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001cecdc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ced30) */"
+    ]
+  },
+  {
+    "address": "001d44d0",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001d4518. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "001d49e8",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001d4a2c. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "001e52a8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001e6290",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001e84f8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001ea128",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "001f1608",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001f1628. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "001f1910",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x001f1934. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "001f6420",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001f68e0) */",
+      "/* WARNING: Removing unreachable block (ram,0x001f6984) */"
+    ]
+  },
+  {
+    "address": "001f8378",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001f8470) */",
+      "/* WARNING: Removing unreachable block (ram,0x001f8538) */"
+    ]
+  },
+  {
+    "address": "001fa0c8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001fa7dc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001fa790) */",
+      "/* WARNING: Removing unreachable block (ram,0x001fa820) */"
+    ]
+  },
+  {
+    "address": "001fa9f0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001faae8) */"
+    ]
+  },
+  {
+    "address": "001fc990",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001fcc70) */",
+      "/* WARNING: Removing unreachable block (ram,0x001fcbc8) */",
+      "/* WARNING: Removing unreachable block (ram,0x001fcc0c) */",
+      "/* WARNING: Removing unreachable block (ram,0x001fcccc) */"
+    ]
+  },
+  {
+    "address": "001fcdf0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001fce50) */"
+    ]
+  },
+  {
+    "address": "001fedd0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001feeb4) */"
+    ]
+  },
+  {
+    "address": "001ff1f0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001ff620) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff590) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff504) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff474) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff3e8) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff358) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff2d0) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff240) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff28c) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff318) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff3a4) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff430) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff4c0) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff54c) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff5dc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ff668) */"
+    ]
+  },
+  {
+    "address": "001ff988",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x001ffde4) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffd54) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffcc8) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffc38) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffbac) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffb1c) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffa94) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffa04) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffa50) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffadc) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffb68) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffbf4) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffc84) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffd10) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffda0) */",
+      "/* WARNING: Removing unreachable block (ram,0x001ffe2c) */"
+    ]
+  },
+  {
+    "address": "00204108",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x00204148. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "0020fe40",
+    "warnings": [
+      "/* WARNING: Type propagation algorithm not settling */"
+    ]
+  },
+  {
+    "address": "00214d50",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00215088) */"
+    ]
+  },
+  {
+    "address": "00217a10",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00217b04) */"
+    ]
+  },
+  {
+    "address": "00224638",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00224738) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022473c) */",
+      "/* WARNING: Removing unreachable block (ram,0x00224790) */",
+      "/* WARNING: Heritage AFTER dead removal. Example location: r0x0029a848 : 0x002247d4 */",
+      "/* WARNING: Restarted to delay deadcode elimination for space: ram */"
+    ]
+  },
+  {
+    "address": "00224a20",
+    "warnings": [
+      "/* WARNING: Heritage AFTER dead removal. Example location: r0x0029a848 : 0x00224b88 */",
+      "/* WARNING: Restarted to delay deadcode elimination for space: ram */"
+    ]
+  },
+  {
+    "address": "00226630",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00226798) */"
+    ]
+  },
+  {
+    "address": "002276c0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0022770c) */"
+    ]
+  },
+  {
+    "address": "002293d0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x002293f0) */",
+      "/* WARNING: Removing unreachable block (ram,0x00229430) */"
+    ]
+  },
+  {
+    "address": "00229ca0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00229e74) */"
+    ]
+  },
+  {
+    "address": "0022a770",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0022aa34) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022a9f0) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022a928) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022a888) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022a97c) */"
+    ]
+  },
+  {
+    "address": "0022b1a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0022b88c) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b890) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b364) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b368) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b384) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b27c) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b280) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b29c) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b44c) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b450) */",
+      "/* WARNING: Removing unreachable block (ram,0x0022b46c) */"
+    ]
+  },
+  {
+    "address": "0022bbc8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0022bc24) */"
+    ]
+  },
+  {
+    "address": "0022be90",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0022bf14) */"
+    ]
+  },
+  {
+    "address": "0022cca8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0022cde4) */"
+    ]
+  },
+  {
+    "address": "0022d8c8",
+    "warnings": [
+      "/* WARNING: Instruction at (ram,0x0022d93c) overlaps instruction at (ram,0x0022d938)"
+    ]
+  },
+  {
+    "address": "0022ebb0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0022ebcc) */"
+    ]
+  },
+  {
+    "address": "00230a30",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00230b8c) */"
+    ]
+  },
+  {
+    "address": "00230ca8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00230df0) */",
+      "/* WARNING: Removing unreachable block (ram,0x00230d88) */",
+      "/* WARNING: Removing unreachable block (ram,0x00230e18) */",
+      "/* WARNING: Removing unreachable block (ram,0x00230d38) */"
+    ]
+  },
+  {
+    "address": "00230f20",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0023108c) */"
+    ]
+  },
+  {
+    "address": "002311d0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00231308) */",
+      "/* WARNING: Removing unreachable block (ram,0x00231270) */",
+      "/* WARNING: Removing unreachable block (ram,0x0023128c) */",
+      "/* WARNING: Removing unreachable block (ram,0x002312ac) */"
+    ]
+  },
+  {
+    "address": "00231ce0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00231d98) */"
+    ]
+  },
+  {
+    "address": "00231ef8",
+    "warnings": [
+      "/* WARNING: Type propagation algorithm not settling */"
+    ]
+  },
+  {
+    "address": "00233918",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x002339d4) */"
+    ]
+  },
+  {
+    "address": "00238a38",
+    "warnings": [
+      "/* WARNING: Do nothing block with infinite loop */"
+    ]
+  },
+  {
+    "address": "002396d0",
+    "warnings": [
+      "/* WARNING: Do nothing block with infinite loop */"
+    ]
+  },
+  {
+    "address": "0023ba9c",
+    "warnings": [
+      "/* WARNING: Instruction at (ram,0x0023baa4) overlaps instruction at (ram,0x0023baa0)"
+    ]
+  },
+  {
+    "address": "0023bbd0",
+    "warnings": [
+      "/* WARNING: Instruction at (ram,0x0023bc5c) overlaps instruction at (ram,0x0023bc58)"
+    ]
+  },
+  {
+    "address": "0023dd38",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0023e02c) */"
+    ]
+  },
+  {
+    "address": "0023e9a8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0023e9bc) */"
+    ]
+  },
+  {
+    "address": "00242d40",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00242da0) */",
+      "/* WARNING: Removing unreachable block (ram,0x00242d80) */"
+    ]
+  },
+  {
+    "address": "00243b50",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002459d0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002463c8",
+    "warnings": [
+      "/* WARNING: Do nothing block with infinite loop */"
+    ]
+  },
+  {
+    "address": "00246510",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002469c8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00246b70",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00247760",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00247a90",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00247ec0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002481b0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002483f8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x002484c0) */",
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002486d0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002488a0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00248f88",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249030",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249098",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249218",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249410",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249728",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249878",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249950",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249c18",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00249ec8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0024a040",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0024a090",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0024a0e8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0024a130",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0024a940",
+    "warnings": [
+      "/* WARNING: Could not recover jumptable at 0x0024a9f4. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "00250dc8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00250fd8",
+    "warnings": [
+      "/* WARNING: Do nothing block with infinite loop */"
+    ]
+  },
+  {
+    "address": "002536e8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00253758) */"
+    ]
+  },
+  {
+    "address": "00255cd8",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00255df8) */",
+      "/* WARNING: Could not recover jumptable at 0x00255e48. Too many branches */",
+      "/* WARNING: Treating indirect jump as call */"
+    ]
+  },
+  {
+    "address": "00259af8",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "0025c470",
+    "warnings": [
+      "/* WARNING: Type propagation algorithm not settling */"
+    ]
+  },
+  {
+    "address": "0025db38",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0025db80) */",
+      "/* WARNING: Removing unreachable block (ram,0x0025dba4) */"
+    ]
+  },
+  {
+    "address": "00261198",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x002611dc) */"
+    ]
+  },
+  {
+    "address": "00262318",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00264ae0",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "00264b60",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  },
+  {
+    "address": "002669d0",
+    "warnings": [
+      "/* WARNING: Instruction at (ram,0x00266a24) overlaps instruction at (ram,0x00266a20)"
+    ]
+  },
+  {
+    "address": "002676c0",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x0026787c) */"
+    ]
+  },
+  {
+    "address": "00267978",
+    "warnings": [
+      "/* WARNING: Removing unreachable block (ram,0x00267a00) */"
+    ]
+  },
+  {
+    "address": "00268958",
+    "warnings": [
+      "/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */"
+    ]
+  }
+]

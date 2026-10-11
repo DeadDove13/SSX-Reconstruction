@@ -1,0 +1,69 @@
+# Build output, local dependencies, reports, and saved settings.
+/target/
+/dist/
+/tools/
+/save/
+
+# Keep development documentation, tests, and packaging helpers out of the repo.
+/tests/
+/docs/
+/scripts/
+/installer/
+/Build-Game.ps1
+/Build-Installer.ps1
+/Create-Shortcut.ps1
+/Run-Game.ps1
+/Run-Viewer.ps1
+/Play-SSX.vbs
+
+# Keep the original decompilation and inputs used by reconstruction tests.
+# Exclude Ghidra databases, logs, screenshots, and temporary asset exports.
+/analysis/*
+!/analysis/decompiled/
+!/analysis/interaction-source/
+!/analysis/presentation-decompiled/
+!/analysis/path_instruction_cases.json
+!/analysis/physics_instruction_cases.json
+!/analysis/ground_input_cases.json
+!/analysis/ground_movement_cases.json
+
+# Original disc images and archives stored at the project root.
+/*.bin
+/*.cue
+/*.iso
+/*.zip
+/*.7z
+/*.rar
+
+# Executables, installers, shortcuts, and reference recordings.
+*.exe
+*.dll
+*.pdb
+*.msi
+*.msix
+*.cab
+*.lnk
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.webm
+
+# Python caches and virtual environments.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local operating-system files.
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Include all game assets, extracted data, and prepared textures in Git.
+# These exceptions also cover asset files with extensions listed above.
+!/assets/
+!/assets/**
+!/extracted/
+!/extracted/**
+

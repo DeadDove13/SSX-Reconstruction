@@ -1,0 +1,6 @@
+Asset: ssx-logo.png
+Tool: built-in image_gen
+Reference: user-supplied SSX title screen, codex-clipboard-af724793-0911-4628-b743-d1df6fe5b667.png
+Output: transparent PNG, copied without image modification.
+Prompt:
+Use case: logo-brand. Input image is a reference for the logo only. Recreate the exact SSX wordmark from this reference as a crisp high resolution isolated transparent game menu asset. Text exactly SSX. Preserve the distinctive italic interlocking two S letters and the long angular X, dark rich navy blue faces, thin ivory metallic beveled outlines and orange-gold dimensional extruded edges. Match the reference silhouette closely. Landscape canvas, tightly framed around the wide logo with small even transparent margins. No background, no start text, no copyright text, no additional marks, no watermarks. Transparent alpha outside the logo.

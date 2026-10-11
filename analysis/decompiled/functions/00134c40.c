@@ -1,0 +1,176 @@
+/* Ghidra pseudocode. PS2 address: 00134c40. Not validated source. */
+
+void FUN_00134c40(int *param_1,int param_2)
+
+{
+  undefined4 uVar1;
+  int iVar2;
+  int iVar3;
+  long lVar4;
+  undefined8 uVar5;
+  undefined8 uVar6;
+  undefined4 *puVar7;
+  int *piVar8;
+  undefined8 uStack_280;
+  undefined8 uStack_278;
+  undefined8 uStack_270;
+  undefined8 uStack_268;
+  undefined8 uStack_260;
+  undefined8 uStack_258;
+  undefined8 uStack_250;
+  undefined8 uStack_248;
+  undefined1 auStack_240 [8];
+  undefined4 uStack_238;
+  undefined4 uStack_234;
+  undefined4 uStack_230;
+  
+  piVar8 = (int *)&uStack_280;
+  uStack_280 = DAT_002aabe0;
+  uStack_278 = DAT_002aabe8;
+  uStack_270 = DAT_002aabf0;
+  uStack_268 = DAT_002aabf8;
+  uStack_260 = DAT_002aac00;
+  uStack_258 = DAT_002aac08;
+  uStack_250 = DAT_002aac10;
+  uStack_248 = DAT_002aac18;
+  uStack_238 = 0;
+  iVar3 = *(int *)(*param_1 + 0x394);
+  uStack_234 = 0;
+  uStack_230 = 0;
+  param_1[0x228] = param_2;
+  lVar4 = FUN_00181950(auStack_240,*(undefined4 *)(iVar3 + 0x58));
+  if (lVar4 != 0) {
+    puVar7 = (undefined4 *)
+             (*(int *)(*(int *)(*param_1 + 0x394) + 0x44) * 0xb4 +
+             *(int *)(*(int *)(*param_1 + 0x394) + 0x2c) * 0x3c + 0x27e248);
+    iVar2 = 0;
+    iVar3 = (int)uStack_280;
+    while (iVar3 != 0) {
+      uVar5 = FUN_00182000(auStack_240,iVar2);
+      piVar8 = piVar8 + 1;
+      uVar6 = FUN_00182018(auStack_240,iVar2);
+      uVar1 = *puVar7;
+      puVar7 = puVar7 + 1;
+      FUN_001816f8(param_1[0x228],uVar1,uVar5,uVar6);
+      iVar2 = iVar2 + 1;
+      iVar3 = *piVar8;
+    }
+    uVar5 = FUN_00181eb0(auStack_240,0);
+    uVar6 = FUN_00181ec8(auStack_240,0);
+    FUN_001816f8(param_1[0x228],0x1b,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,1);
+    uVar6 = FUN_00181ec8(auStack_240,1);
+    FUN_001816f8(param_1[0x228],0x1c,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,2);
+    uVar6 = FUN_00181ec8(auStack_240,2);
+    FUN_001816f8(param_1[0x228],0x1d,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,3);
+    uVar6 = FUN_00181ec8(auStack_240,3);
+    FUN_001816f8(param_1[0x228],0x1e,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,4);
+    uVar6 = FUN_00181ec8(auStack_240,4);
+    FUN_001816f8(param_1[0x228],0x1f,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,5);
+    uVar6 = FUN_00181ec8(auStack_240,5);
+    FUN_001816f8(param_1[0x228],0x20,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,6);
+    uVar6 = FUN_00181ec8(auStack_240,6);
+    FUN_001816f8(param_1[0x228],0x21,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,7);
+    uVar6 = FUN_00181ec8(auStack_240,7);
+    FUN_001816f8(param_1[0x228],0x22,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,8);
+    uVar6 = FUN_00181ec8(auStack_240,8);
+    FUN_001816f8(param_1[0x228],0x23,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,9);
+    uVar6 = FUN_00181ec8(auStack_240,9);
+    FUN_001816f8(param_1[0x228],0x24,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,10);
+    uVar6 = FUN_00181ec8(auStack_240,10);
+    FUN_001816f8(param_1[0x228],0x25,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0xb);
+    uVar6 = FUN_00181ec8(auStack_240,0xb);
+    FUN_001816f8(param_1[0x228],0x26,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0xc);
+    uVar6 = FUN_00181ec8(auStack_240,0xc);
+    FUN_001816f8(param_1[0x228],0x27,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0xd);
+    uVar6 = FUN_00181ec8(auStack_240,0xd);
+    FUN_001816f8(param_1[0x228],0x28,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0xe);
+    uVar6 = FUN_00181ec8(auStack_240,0xe);
+    FUN_001816f8(param_1[0x228],0x29,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0xf);
+    uVar6 = FUN_00181ec8(auStack_240,0xf);
+    FUN_001816f8(param_1[0x228],0x2a,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0x10);
+    uVar6 = FUN_00181ec8(auStack_240,0x10);
+    FUN_001816f8(param_1[0x228],0x2b,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0x11);
+    uVar6 = FUN_00181ec8(auStack_240,0x11);
+    FUN_001816f8(param_1[0x228],0x2c,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0x12);
+    uVar6 = FUN_00181ec8(auStack_240,0x12);
+    FUN_001816f8(param_1[0x228],0x2d,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0x13);
+    uVar6 = FUN_00181ec8(auStack_240,0x13);
+    FUN_001816f8(param_1[0x228],0x2e,uVar5,uVar6);
+    uVar5 = FUN_00181eb0(auStack_240,0x14);
+    uVar6 = FUN_00181ec8(auStack_240,0x14);
+    FUN_001816f8(param_1[0x228],0x2f,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,0);
+    uVar6 = FUN_00181fe8(auStack_240,0);
+    FUN_00181718(param_1[0x228],0,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,1);
+    uVar6 = FUN_00181fe8(auStack_240,1);
+    FUN_00181718(param_1[0x228],1,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,2);
+    uVar6 = FUN_00181fe8(auStack_240,2);
+    FUN_00181718(param_1[0x228],2,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,3);
+    uVar6 = FUN_00181fe8(auStack_240,3);
+    FUN_00181718(param_1[0x228],3,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,4);
+    uVar6 = FUN_00181fe8(auStack_240,4);
+    FUN_00181718(param_1[0x228],4,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,5);
+    uVar6 = FUN_00181fe8(auStack_240,5);
+    FUN_00181718(param_1[0x228],5,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,6);
+    uVar6 = FUN_00181fe8(auStack_240,6);
+    FUN_00181718(param_1[0x228],6,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,7);
+    uVar6 = FUN_00181fe8(auStack_240,7);
+    FUN_00181718(param_1[0x228],7,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,8);
+    uVar6 = FUN_00181fe8(auStack_240,8);
+    FUN_00181718(param_1[0x228],8,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,9);
+    uVar6 = FUN_00181fe8(auStack_240,9);
+    FUN_00181718(param_1[0x228],9,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,10);
+    uVar6 = FUN_00181fe8(auStack_240,10);
+    FUN_00181718(param_1[0x228],10,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,0xb);
+    uVar6 = FUN_00181fe8(auStack_240,0xb);
+    FUN_00181718(param_1[0x228],0xb,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,0xc);
+    uVar6 = FUN_00181fe8(auStack_240,0xc);
+    FUN_00181718(param_1[0x228],0xc,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,0xd);
+    uVar6 = FUN_00181fe8(auStack_240,0xd);
+    FUN_00181718(param_1[0x228],0xd,uVar5,uVar6);
+    uVar5 = FUN_00181fd0(auStack_240,0xe);
+    uVar6 = FUN_00181fe8(auStack_240,0xe);
+    FUN_00181718(param_1[0x228],0xe,uVar5,uVar6);
+  }
+  lVar4 = FUN_0023a448(0x2aac20,8,0);
+  if (lVar4 != 0) {
+    FUN_0023bbd0(lVar4,0xffffffffdeadc0de,8);
+  }
+  iVar3 = FUN_00133240(lVar4,*(undefined4 *)param_1[0x228]);
+  param_1[0x229] = iVar3;
+  FUN_00135a38(auStack_240,2);
+  return;
+}
+

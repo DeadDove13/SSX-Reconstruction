@@ -1,0 +1,96 @@
+/* Ghidra pseudocode. PS2 address: 001799e0. Not validated source. */
+
+undefined8 FUN_001799e0(undefined8 param_1,undefined4 param_2,undefined4 param_3)
+
+{
+  undefined4 *puVar1;
+  
+  puVar1 = (undefined4 *)param_1;
+  puVar1[2] = 1;
+  puVar1[1] = 0;
+  puVar1[0x10] = &DAT_002b1480;
+  puVar1[3] = 0;
+  puVar1[6] = &DAT_002c4a28;
+  puVar1[0x1b] = &DAT_002b1028;
+  puVar1[0x14] = 1;
+  puVar1[0x16] = 1;
+  puVar1[0x18] = 1;
+  puVar1[0x19] = 1;
+  *puVar1 = 0;
+  puVar1[5] = 0;
+  puVar1[7] = 0;
+  puVar1[8] = 0;
+  puVar1[9] = 0;
+  puVar1[10] = 0;
+  puVar1[0xe] = 0;
+  puVar1[0x13] = 0;
+  puVar1[0x15] = 0;
+  puVar1[0x17] = 0;
+  puVar1[0x1a] = 0;
+  puVar1[4] = param_3;
+  puVar1[0xb] = 0xf;
+  puVar1[0x11] = param_2;
+  puVar1[0x12] = s_NAME__002c4ad0;
+  FUN_00177718(puVar1 + 0x12);
+  puVar1[0x1f] = 0;
+  puVar1[0x1b] = &DAT_002b0fb8;
+  puVar1[0x1e] = &DAT_002c4a28;
+  puVar1[0x29] = &DAT_002b1028;
+  puVar1[0x22] = 1;
+  puVar1[0x24] = 1;
+  puVar1[0x26] = 1;
+  puVar1[0x27] = 1;
+  puVar1[0x1c] = 0;
+  puVar1[0x1d] = 0;
+  puVar1[0x21] = 0;
+  puVar1[0x23] = 0;
+  puVar1[0x25] = 0;
+  puVar1[0x28] = 0;
+  puVar1[0x20] = "RANKING:";
+  FUN_00177718(puVar1 + 0x20);
+  puVar1[0x29] = &DAT_002b0fb8;
+  puVar1[0x2d] = 0;
+  puVar1[0x2c] = &DAT_002c4a28;
+  puVar1[0x37] = &DAT_002b1028;
+  puVar1[0x30] = 1;
+  puVar1[0x32] = 1;
+  puVar1[0x34] = 1;
+  puVar1[0x35] = 1;
+  puVar1[0x2a] = 0;
+  puVar1[0x2b] = 0;
+  puVar1[0x2f] = 0;
+  puVar1[0x31] = 0;
+  puVar1[0x33] = 0;
+  puVar1[0x36] = 0;
+  puVar1[0x2e] = "BLOODTYPE:";
+  FUN_00177718(puVar1 + 0x2e);
+  puVar1[0x37] = &DAT_002b0fb8;
+  puVar1[0x3b] = 0;
+  puVar1[0x3a] = &DAT_002c4a28;
+  puVar1[0x45] = &DAT_002b1028;
+  puVar1[0x43] = 1;
+  puVar1[0x3e] = 1;
+  puVar1[0x40] = 1;
+  puVar1[0x42] = 1;
+  puVar1[0x38] = 0;
+  puVar1[0x39] = 0;
+  puVar1[0x3d] = 0;
+  puVar1[0x3f] = 0;
+  puVar1[0x41] = 0;
+  puVar1[0x44] = 0;
+  puVar1[0x3c] = "RIDING STYLE:";
+  FUN_00177718(puVar1 + 0x3c);
+  puVar1[0x45] = &DAT_002b0fb8;
+  puVar1[0x48] = &DAT_002c4a28;
+  puVar1[0x46] = 0;
+  puVar1[0x47] = 0;
+  puVar1[0x49] = 0;
+  FUN_00179c30(param_1);
+  puVar1[0x2b] = puVar1[0x11] + 0x400;
+  FUN_00174c68(param_1,puVar1 + 0x12);
+  FUN_00174c68(param_1,puVar1 + 0x20);
+  FUN_00174c68(param_1,puVar1 + 0x2e);
+  FUN_00174c68(param_1,puVar1 + 0x3c);
+  return param_1;
+}
+

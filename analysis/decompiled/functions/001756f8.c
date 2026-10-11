@@ -1,0 +1,98 @@
+/* Ghidra pseudocode. PS2 address: 001756f8. Not validated source. */
+
+undefined8 FUN_001756f8(undefined8 param_1,undefined4 param_2,undefined4 param_3)
+
+{
+  undefined4 uVar1;
+  undefined4 *puVar2;
+  
+  puVar2 = (undefined4 *)param_1;
+  puVar2[0x10] = &DAT_002b0e20;
+  puVar2[2] = 1;
+  puVar2[1] = 0;
+  puVar2[3] = 0;
+  puVar2[0x1a] = &DAT_002b1028;
+  puVar2[0x13] = 1;
+  puVar2[0x15] = 1;
+  puVar2[0x17] = 1;
+  puVar2[0x18] = 1;
+  *puVar2 = 0;
+  puVar2[5] = 0;
+  puVar2[7] = 0;
+  puVar2[8] = 0;
+  puVar2[9] = 0;
+  puVar2[10] = 0;
+  puVar2[0xe] = 0;
+  puVar2[0x12] = 0;
+  puVar2[0x14] = 0;
+  puVar2[0x16] = 0;
+  puVar2[0x19] = 0;
+  puVar2[4] = param_2;
+  puVar2[6] = param_3;
+  puVar2[0xb] = 0xf;
+  puVar2[0x11] = "Vibration 1P";
+  FUN_00177718(puVar2 + 0x11);
+  puVar2[0x1d] = &DAT_002c4998;
+  puVar2[0x1a] = &DAT_002b0ff0;
+  uVar1 = DAT_0027acc8;
+  puVar2[0x1c] = &DAT_0027acc8;
+  puVar2[0x1e] = &DAT_002c49a0;
+  puVar2[0x28] = &DAT_002b1028;
+  puVar2[0x21] = 1;
+  puVar2[0x23] = 1;
+  puVar2[0x25] = 1;
+  puVar2[0x26] = 1;
+  puVar2[0x20] = 0;
+  puVar2[0x22] = 0;
+  puVar2[0x24] = 0;
+  puVar2[0x27] = 0;
+  puVar2[0x1b] = uVar1;
+  puVar2[0x1f] = "Vibration 2P";
+  FUN_00177718(puVar2 + 0x1f);
+  puVar2[0x28] = &DAT_002b0ff0;
+  puVar2[0x2c] = &DAT_002c49a0;
+  uVar1 = DAT_0027accc;
+  puVar2[0x2b] = &DAT_002c4998;
+  puVar2[0x36] = &DAT_002b1028;
+  puVar2[0x2f] = 1;
+  puVar2[0x31] = 1;
+  puVar2[0x33] = 1;
+  puVar2[0x34] = 1;
+  puVar2[0x2a] = &DAT_0027accc;
+  puVar2[0x2e] = 0;
+  puVar2[0x30] = 0;
+  puVar2[0x32] = 0;
+  puVar2[0x35] = 0;
+  puVar2[0x29] = uVar1;
+  puVar2[0x2d] = "Controller 1P";
+  FUN_00177718(puVar2 + 0x2d);
+  uVar1 = DAT_0027acdc;
+  puVar2[0x39] = 2;
+  puVar2[0x36] = &DAT_002b0f48;
+  puVar2[0x38] = &DAT_0027acdc;
+  puVar2[0x44] = &DAT_002b1028;
+  puVar2[0x42] = 1;
+  puVar2[0x3d] = 1;
+  puVar2[0x3f] = 1;
+  puVar2[0x41] = 1;
+  puVar2[0x3a] = &PTR_s__Default__002c4990;
+  puVar2[0x3c] = 0;
+  puVar2[0x3e] = 0;
+  puVar2[0x40] = 0;
+  puVar2[0x43] = 0;
+  puVar2[0x37] = uVar1;
+  puVar2[0x3b] = "Controller 2P";
+  FUN_00177718(puVar2 + 0x3b);
+  uVar1 = DAT_0027ace0;
+  puVar2[0x44] = &DAT_002b0f48;
+  puVar2[0x46] = &DAT_0027ace0;
+  puVar2[0x47] = 2;
+  puVar2[0x45] = uVar1;
+  puVar2[0x48] = &PTR_s__Default__002c4990;
+  FUN_00174c68(param_1,puVar2 + 0x11);
+  FUN_00174c68(param_1,puVar2 + 0x1f);
+  FUN_00174c68(param_1,puVar2 + 0x2d);
+  FUN_00174c68(param_1,puVar2 + 0x3b);
+  return param_1;
+}
+

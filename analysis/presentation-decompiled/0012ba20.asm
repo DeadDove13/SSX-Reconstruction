@@ -1,0 +1,24 @@
+0012ba20 addiu s0,s2,0x310
+0012ba24 nop
+0012ba28 move a0,s3
+0012ba2c jal 0x00197d48
+0012ba30 _move a1,s3
+0012ba34 addiu s1,s1,0x1
+0012ba38 lw v1,0x3c(s2)
+0012ba3c sw v0,0x0(s0)
+0012ba40 slt v1,s1,v1
+0012ba44 bne v1,zero,0x0012ba28
+0012ba48 _addiu s0,s0,0x4
+0012ba4c lw v0,0x40(s2)
+0012ba50 beq v0,zero,0x0012ba64
+0012ba54 _move v0,s2
+0012ba58 jal 0x0012bce8
+0012ba5c _move a0,s2
+0012ba60 move v0,s2
+0012ba64 ld ra,0x40(sp)
+0012ba68 ld s3,0x30(sp)
+0012ba6c ld s2,0x20(sp)
+0012ba70 ld s1,0x10(sp)
+0012ba74 ld s0,0x0(sp)
+0012ba78 jr ra
+0012ba7c _addiu sp,sp,0x50

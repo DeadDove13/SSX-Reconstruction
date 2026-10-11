@@ -1,0 +1,94 @@
+/* Ghidra pseudocode. PS2 address: 001d3530. Not validated source. */
+
+void FUN_001d3530(int param_1,undefined8 *param_2)
+
+{
+  undefined8 uVar1;
+  undefined4 uVar2;
+  undefined4 uVar3;
+  undefined4 uVar4;
+  int iVar5;
+  
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  *(undefined8 *)(iVar5 + 0x20) = *param_2;
+  *(undefined8 *)(iVar5 + 0x28) = param_2[1];
+  *(undefined8 *)(iVar5 + 0x30) = param_2[2];
+  *(undefined8 *)(iVar5 + 0x38) = param_2[3];
+  *(undefined8 *)(iVar5 + 0x40) = param_2[4];
+  *(undefined8 *)(iVar5 + 0x48) = param_2[5];
+  *(undefined8 *)(iVar5 + 0x50) = param_2[6];
+  *(undefined8 *)(iVar5 + 0x58) = param_2[7];
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  *(undefined8 *)(iVar5 + 0x60) = param_2[8];
+  *(undefined8 *)(iVar5 + 0x68) = param_2[9];
+  *(undefined8 *)(iVar5 + 0x70) = param_2[10];
+  *(undefined8 *)(iVar5 + 0x78) = param_2[0xb];
+  *(undefined8 *)(iVar5 + 0x80) = param_2[0xc];
+  *(undefined8 *)(iVar5 + 0x88) = param_2[0xd];
+  *(undefined8 *)(iVar5 + 0x90) = param_2[0xe];
+  *(undefined8 *)(iVar5 + 0x98) = param_2[0xf];
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  *(undefined8 *)(iVar5 + 0xa0) = param_2[0x10];
+  *(undefined8 *)(iVar5 + 0xa8) = param_2[0x11];
+  *(undefined8 *)(iVar5 + 0xb0) = param_2[0x12];
+  *(undefined8 *)(iVar5 + 0xb8) = param_2[0x13];
+  *(undefined8 *)(iVar5 + 0xc0) = param_2[0x14];
+  *(undefined8 *)(iVar5 + 200) = param_2[0x15];
+  *(undefined8 *)(iVar5 + 0xd0) = param_2[0x16];
+  *(undefined8 *)(iVar5 + 0xd8) = param_2[0x17];
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  uVar2 = *(undefined4 *)((int)param_2 + 0xc4);
+  uVar3 = *(undefined4 *)(param_2 + 0x19);
+  uVar4 = *(undefined4 *)((int)param_2 + 0xcc);
+  *(undefined4 *)(iVar5 + 0xe0) = *(undefined4 *)(param_2 + 0x18);
+  *(undefined4 *)(iVar5 + 0xe4) = uVar2;
+  *(undefined4 *)(iVar5 + 0xe8) = uVar3;
+  *(undefined4 *)(iVar5 + 0xec) = uVar4;
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  uVar1 = param_2[0x1a];
+  uVar2 = *(undefined4 *)(param_2 + 0x1b);
+  uVar3 = *(undefined4 *)((int)param_2 + 0xdc);
+  *(int *)(iVar5 + 0xf0) = (int)uVar1;
+  *(int *)(iVar5 + 0xf4) = (int)((ulong)uVar1 >> 0x20);
+  *(undefined4 *)(iVar5 + 0xf8) = uVar2;
+  *(undefined4 *)(iVar5 + 0xfc) = uVar3;
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  *(undefined8 *)(iVar5 + 0x100) = param_2[0x1c];
+  *(undefined8 *)(iVar5 + 0x108) = param_2[0x1d];
+  *(undefined8 *)(iVar5 + 0x110) = param_2[0x1e];
+  *(undefined8 *)(iVar5 + 0x118) = param_2[0x1f];
+  *(undefined8 *)(iVar5 + 0x120) = param_2[0x20];
+  *(undefined8 *)(iVar5 + 0x128) = param_2[0x21];
+  *(undefined8 *)(iVar5 + 0x130) = param_2[0x22];
+  *(undefined8 *)(iVar5 + 0x138) = param_2[0x23];
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  *(undefined8 *)(iVar5 + 0x140) = param_2[0x24];
+  *(undefined8 *)(iVar5 + 0x148) = param_2[0x25];
+  *(undefined8 *)(iVar5 + 0x150) = param_2[0x26];
+  *(undefined8 *)(iVar5 + 0x158) = param_2[0x27];
+  *(undefined8 *)(iVar5 + 0x160) = param_2[0x28];
+  *(undefined8 *)(iVar5 + 0x168) = param_2[0x29];
+  *(undefined8 *)(iVar5 + 0x170) = param_2[0x2a];
+  *(undefined8 *)(iVar5 + 0x178) = param_2[0x2b];
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  uVar2 = *(undefined4 *)((int)param_2 + 0x164);
+  uVar3 = *(undefined4 *)(param_2 + 0x2d);
+  uVar4 = *(undefined4 *)((int)param_2 + 0x16c);
+  *(undefined4 *)(iVar5 + 0x180) = *(undefined4 *)(param_2 + 0x2c);
+  *(undefined4 *)(iVar5 + 0x184) = uVar2;
+  *(undefined4 *)(iVar5 + 0x188) = uVar3;
+  *(undefined4 *)(iVar5 + 0x18c) = uVar4;
+  iVar5 = *(int *)(param_1 + 0x10) * 0x180 + param_1;
+  uVar1 = param_2[0x2e];
+  uVar2 = *(undefined4 *)(param_2 + 0x2f);
+  uVar3 = *(undefined4 *)((int)param_2 + 0x17c);
+  *(int *)(iVar5 + 400) = (int)uVar1;
+  *(int *)(iVar5 + 0x194) = (int)((ulong)uVar1 >> 0x20);
+  *(undefined4 *)(iVar5 + 0x198) = uVar2;
+  *(undefined4 *)(iVar5 + 0x19c) = uVar3;
+  *(undefined4 *)(param_1 + 0xd07c) = 0;
+  *(undefined4 *)(param_1 + 0xd084) = *(undefined4 *)(param_1 + 0x10);
+  *(int *)(param_1 + 0x10) = *(int *)(param_1 + 0x10) + 1;
+  return;
+}
+

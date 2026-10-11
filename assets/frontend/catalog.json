@@ -1,0 +1,1170 @@
+[
+  {
+    "name": "Hiro",
+    "base_stats": [
+      48,
+      88,
+      80,
+      40,
+      24,
+      42,
+      24,
+      64,
+      20,
+      56,
+      40,
+      42,
+      27,
+      64,
+      48,
+      24
+    ],
+    "limits": [
+      90,
+      99,
+      64,
+      60
+    ],
+    "stance": 0,
+    "boards": [
+      {
+        "name": "Absolute Zero (Alpine)",
+        "style": 2,
+        "stats": [
+          40,
+          41,
+          26,
+          25
+        ]
+      },
+      {
+        "name": "Titanium TX (Alpine)",
+        "style": 2,
+        "stats": [
+          40,
+          41,
+          26,
+          25
+        ]
+      },
+      {
+        "name": "Graphiter (Alpine)",
+        "style": 2,
+        "stats": [
+          55,
+          57,
+          37,
+          35
+        ]
+      },
+      {
+        "name": "Shogun Slinger (Alpine)",
+        "style": 2,
+        "stats": [
+          73,
+          74,
+          48,
+          45
+        ]
+      },
+      {
+        "name": "Magnate Split (Freestyle)",
+        "style": 1,
+        "stats": [
+          38,
+          49,
+          59,
+          88
+        ]
+      },
+      {
+        "name": "SSX Chromium (Alpine)",
+        "style": 2,
+        "stats": [
+          88,
+          90,
+          58,
+          56
+        ]
+      },
+      {
+        "name": "Corporate (Freestyle)",
+        "style": 1,
+        "stats": [
+          59,
+          62,
+          78,
+          93
+        ]
+      },
+      {
+        "name": "Hiranimo C-Type (Alpine)",
+        "style": 2,
+        "stats": [
+          99,
+          99,
+          80,
+          76
+        ]
+      },
+      {
+        "name": "Metal Opus (Alpine)",
+        "style": 2,
+        "stats": [
+          99,
+          99,
+          80,
+          76
+        ]
+      },
+      {
+        "name": "Technician AK (Alpine)",
+        "style": 2,
+        "stats": [
+          99,
+          99,
+          80,
+          76
+        ]
+      },
+      {
+        "name": "Sunflakez (Alpine)",
+        "style": 2,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "Vapour",
+      "Archtype",
+      "Stealth",
+      "Nemesis"
+    ]
+  },
+  {
+    "name": "Kaori",
+    "base_stats": [
+      24,
+      48,
+      94,
+      20,
+      30,
+      32,
+      44,
+      72,
+      40,
+      72,
+      94,
+      32,
+      46,
+      48,
+      50,
+      36
+    ],
+    "limits": [
+      73,
+      76,
+      63,
+      99
+    ],
+    "stance": 0,
+    "boards": [
+      {
+        "name": "Neo-Vixen (Freestyle)",
+        "style": 1,
+        "stats": [
+          27,
+          28,
+          35,
+          42
+        ]
+      },
+      {
+        "name": "Lady Love Bug (Freestyle)",
+        "style": 1,
+        "stats": [
+          27,
+          28,
+          35,
+          42
+        ]
+      },
+      {
+        "name": "Skyhopper (Freestyle)",
+        "style": 1,
+        "stats": [
+          38,
+          39,
+          49,
+          58
+        ]
+      },
+      {
+        "name": "Moo Moo 22 (Freestyle)",
+        "style": 1,
+        "stats": [
+          49,
+          51,
+          64,
+          76
+        ]
+      },
+      {
+        "name": "Alpha (BX)",
+        "style": 0,
+        "stats": [
+          67,
+          74,
+          60,
+          43
+        ]
+      },
+      {
+        "name": "Princes Pie (Freestyle)",
+        "style": 1,
+        "stats": [
+          59,
+          62,
+          78,
+          93
+        ]
+      },
+      {
+        "name": "Corporate (BX)",
+        "style": 0,
+        "stats": [
+          75,
+          69,
+          80,
+          68
+        ]
+      },
+      {
+        "name": "Kaori-animai (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "Banana Peeler (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "Sumo Trick Stick (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "Perpa Traitor (Freestyle)",
+        "style": 1,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "Blush",
+      "Tango",
+      "Day-Z",
+      "BumbleBee"
+    ]
+  },
+  {
+    "name": "Jurgen",
+    "base_stats": [
+      20,
+      40,
+      80,
+      47,
+      46,
+      21,
+      22,
+      64,
+      28,
+      40,
+      48,
+      36,
+      25,
+      94,
+      95,
+      25
+    ],
+    "limits": [
+      72,
+      82,
+      99,
+      50
+    ],
+    "stance": 0,
+    "boards": [
+      {
+        "name": "RedBase (BX)",
+        "style": 0,
+        "stats": [
+          34,
+          31,
+          36,
+          31
+        ]
+      },
+      {
+        "name": "German Scissor (BX)",
+        "style": 0,
+        "stats": [
+          34,
+          31,
+          36,
+          31
+        ]
+      },
+      {
+        "name": "Otis (BX)",
+        "style": 0,
+        "stats": [
+          47,
+          44,
+          50,
+          43
+        ]
+      },
+      {
+        "name": "Metaplate (BX)",
+        "style": 0,
+        "stats": [
+          62,
+          57,
+          65,
+          56
+        ]
+      },
+      {
+        "name": "Alpenshusser (Alpine)",
+        "style": 2,
+        "stats": [
+          75,
+          77,
+          37,
+          45
+        ]
+      },
+      {
+        "name": "Chaotic Crippler (BX)",
+        "style": 0,
+        "stats": [
+          75,
+          69,
+          80,
+          68
+        ]
+      },
+      {
+        "name": "Corporate (Alpine)",
+        "style": 2,
+        "stats": [
+          88,
+          90,
+          58,
+          56
+        ]
+      },
+      {
+        "name": "Jurganim (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "Aionic (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "The Boot (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "HairSuit (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "November",
+      "Fallout",
+      "Tracker",
+      "Autumn"
+    ]
+  },
+  {
+    "name": "Mac",
+    "base_stats": [
+      28,
+      56,
+      88,
+      32,
+      32,
+      28,
+      47,
+      40,
+      48,
+      94,
+      88,
+      26,
+      41,
+      40,
+      56,
+      47
+    ],
+    "limits": [
+      68,
+      70,
+      85,
+      99
+    ],
+    "stance": 0,
+    "boards": [
+      {
+        "name": "Weiner (Freestyle)",
+        "style": 1,
+        "stats": [
+          27,
+          28,
+          35,
+          42
+        ]
+      },
+      {
+        "name": "Devilstick (Freestyle)",
+        "style": 1,
+        "stats": [
+          27,
+          28,
+          35,
+          42
+        ]
+      },
+      {
+        "name": "Razorwire (Freestyle)",
+        "style": 1,
+        "stats": [
+          38,
+          39,
+          49,
+          58
+        ]
+      },
+      {
+        "name": "Boo Boo (Freestyle)",
+        "style": 1,
+        "stats": [
+          49,
+          51,
+          64,
+          76
+        ]
+      },
+      {
+        "name": "Spirit (Alpine)",
+        "style": 2,
+        "stats": [
+          55,
+          77,
+          67,
+          35
+        ]
+      },
+      {
+        "name": "Benjamin (Freestyle)",
+        "style": 1,
+        "stats": [
+          59,
+          62,
+          78,
+          93
+        ]
+      },
+      {
+        "name": "Buzzsaw (BX)",
+        "style": 0,
+        "stats": [
+          75,
+          69,
+          80,
+          68
+        ]
+      },
+      {
+        "name": "AnimMac (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "VeloCity (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "WildWest (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "Interrupting Pirate (Freestyle)",
+        "style": 1,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "Sunday Best",
+      "Camorade",
+      "Macjacket",
+      "G.I.Mojo"
+    ]
+  },
+  {
+    "name": "Moby",
+    "base_stats": [
+      44,
+      95,
+      72,
+      36,
+      42,
+      36,
+      28,
+      61,
+      22,
+      48,
+      80,
+      26,
+      28,
+      66,
+      84,
+      25
+    ],
+    "limits": [
+      65,
+      78,
+      74,
+      93
+    ],
+    "stance": 1,
+    "boards": [
+      {
+        "name": "Plasmatic (BX)",
+        "style": 0,
+        "stats": [
+          34,
+          31,
+          36,
+          31
+        ]
+      },
+      {
+        "name": "Patriot (BX)",
+        "style": 0,
+        "stats": [
+          34,
+          31,
+          36,
+          31
+        ]
+      },
+      {
+        "name": "Cutting (BX)",
+        "style": 0,
+        "stats": [
+          47,
+          44,
+          50,
+          43
+        ]
+      },
+      {
+        "name": "Entomology (BX)",
+        "style": 0,
+        "stats": [
+          62,
+          57,
+          65,
+          56
+        ]
+      },
+      {
+        "name": "Essence (Freestyle)",
+        "style": 1,
+        "stats": [
+          78,
+          49,
+          69,
+          88
+        ]
+      },
+      {
+        "name": "Greenblade (BX)",
+        "style": 0,
+        "stats": [
+          75,
+          69,
+          80,
+          68
+        ]
+      },
+      {
+        "name": "Kinoptic (Alpine)",
+        "style": 2,
+        "stats": [
+          88,
+          50,
+          58,
+          86
+        ]
+      },
+      {
+        "name": "AnimMoby (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "Datum (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "Sloppy Bite (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "BlooGoo (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "Emperor",
+      "Entomolo",
+      "Anarchist",
+      "EagleEye"
+    ]
+  },
+  {
+    "name": "Zoe",
+    "base_stats": [
+      32,
+      72,
+      60,
+      28,
+      40,
+      40,
+      36,
+      82,
+      36,
+      66,
+      62,
+      36,
+      44,
+      56,
+      82,
+      40
+    ],
+    "limits": [
+      84,
+      84,
+      78,
+      80
+    ],
+    "stance": 0,
+    "boards": [
+      {
+        "name": "Seratonin Screwball (BX)",
+        "style": 0,
+        "stats": [
+          34,
+          31,
+          36,
+          31
+        ]
+      },
+      {
+        "name": "Anarchy (BX)",
+        "style": 0,
+        "stats": [
+          34,
+          31,
+          36,
+          31
+        ]
+      },
+      {
+        "name": "Bad Girl (BX)",
+        "style": 0,
+        "stats": [
+          47,
+          44,
+          50,
+          43
+        ]
+      },
+      {
+        "name": "Lethium Surprise (BX)",
+        "style": 0,
+        "stats": [
+          62,
+          57,
+          65,
+          56
+        ]
+      },
+      {
+        "name": "Plastic You (Freestyle)",
+        "style": 1,
+        "stats": [
+          48,
+          69,
+          79,
+          88
+        ]
+      },
+      {
+        "name": "Alien Blues (BX)",
+        "style": 0,
+        "stats": [
+          75,
+          69,
+          80,
+          68
+        ]
+      },
+      {
+        "name": "Chaos (Freestyle)",
+        "style": 1,
+        "stats": [
+          59,
+          62,
+          78,
+          93
+        ]
+      },
+      {
+        "name": "Zoanim (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "Atomic Crush (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "Bomb Dropper (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          95,
+          99,
+          93
+        ]
+      },
+      {
+        "name": "Righteous Path (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "Vivid",
+      "Livid",
+      "Viper",
+      "Olio"
+    ]
+  },
+  {
+    "name": "JP",
+    "base_stats": [
+      36,
+      55,
+      56,
+      20,
+      28,
+      20,
+      40,
+      88,
+      50,
+      80,
+      56,
+      38,
+      42,
+      80,
+      72,
+      44
+    ],
+    "limits": [
+      77,
+      72,
+      75,
+      94
+    ],
+    "stance": 1,
+    "boards": [
+      {
+        "name": "ShowStopper (Freestyle)",
+        "style": 1,
+        "stats": [
+          27,
+          28,
+          35,
+          42
+        ]
+      },
+      {
+        "name": "JetSetter (Freestyle)",
+        "style": 1,
+        "stats": [
+          27,
+          38,
+          35,
+          42
+        ]
+      },
+      {
+        "name": "Magnate Split (Freestyle)",
+        "style": 1,
+        "stats": [
+          38,
+          39,
+          49,
+          58
+        ]
+      },
+      {
+        "name": "Eurotech (Freestyle)",
+        "style": 1,
+        "stats": [
+          49,
+          51,
+          64,
+          76
+        ]
+      },
+      {
+        "name": "Suave (BX)",
+        "style": 0,
+        "stats": [
+          77,
+          44,
+          50,
+          73
+        ]
+      },
+      {
+        "name": "Resonance (Freestyle)",
+        "style": 1,
+        "stats": [
+          59,
+          62,
+          78,
+          93
+        ]
+      },
+      {
+        "name": "Chaos Crippler (BX)",
+        "style": 0,
+        "stats": [
+          75,
+          69,
+          80,
+          68
+        ]
+      },
+      {
+        "name": "JP Ego-anim (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "Hucker Special (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "Big Poppa (Freestyle)",
+        "style": 1,
+        "stats": [
+          81,
+          85,
+          99,
+          99
+        ]
+      },
+      {
+        "name": "Crazy Ates (Freestyle)",
+        "style": 1,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "Atlantic",
+      "FlyBoy",
+      "Bandit",
+      "Revolution"
+    ]
+  },
+  {
+    "name": "Elise",
+    "base_stats": [
+      40,
+      64,
+      48,
+      44,
+      28,
+      44,
+      24,
+      48,
+      44,
+      64,
+      56,
+      40,
+      36,
+      88,
+      64,
+      27
+    ],
+    "limits": [
+      99,
+      91,
+      64,
+      75
+    ],
+    "stance": 1,
+    "boards": [
+      {
+        "name": "Kamoniwana (BX)",
+        "style": 0,
+        "stats": [
+          40,
+          41,
+          26,
+          25
+        ]
+      },
+      {
+        "name": "Angel (BX)",
+        "style": 0,
+        "stats": [
+          40,
+          41,
+          26,
+          25
+        ]
+      },
+      {
+        "name": "SmoothMaker (BX)",
+        "style": 0,
+        "stats": [
+          55,
+          57,
+          37,
+          35
+        ]
+      },
+      {
+        "name": "Butterfly High (BX)",
+        "style": 0,
+        "stats": [
+          73,
+          74,
+          48,
+          45
+        ]
+      },
+      {
+        "name": "True Colours (Alpine)",
+        "style": 2,
+        "stats": [
+          47,
+          94,
+          50,
+          33
+        ]
+      },
+      {
+        "name": "Buttercup (BX)",
+        "style": 0,
+        "stats": [
+          88,
+          90,
+          58,
+          56
+        ]
+      },
+      {
+        "name": "Baby Doll (Freestyle)",
+        "style": 1,
+        "stats": [
+          59,
+          62,
+          78,
+          93
+        ]
+      },
+      {
+        "name": "Eliseanime (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          99,
+          80,
+          76
+        ]
+      },
+      {
+        "name": "First Date (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          99,
+          80,
+          76
+        ]
+      },
+      {
+        "name": "Last Date (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          99,
+          80,
+          76
+        ]
+      },
+      {
+        "name": "Snobubbles (BX)",
+        "style": 0,
+        "stats": [
+          99,
+          99,
+          99,
+          99
+        ]
+      }
+    ],
+    "outfits": [
+      "Venus",
+      "Aphrodite",
+      "DoubleTake",
+      "2nd Skin"
+    ]
+  }
+]

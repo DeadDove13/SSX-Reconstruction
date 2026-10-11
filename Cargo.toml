@@ -1,0 +1,48 @@
+[package]
+name = "ssx-rust"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+description = "SSX PS2 reconstruction: native asset readers and a Bevy track viewer"
+
+[features]
+default = []
+viewer = ["dep:bevy", "dep:image", "dep:winit"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+bevy = { version = "=0.19.1", default-features = false, features = ["3d", "ui", "bevy_audio", "wav"], optional = true }
+image = { version = "=0.25.10", default-features = false, optional = true }
+winit = { version = "=0.30.13", default-features = false, optional = true }
+
+[[bin]]
+name = "ssx-assets"
+path = "src/bin/assets.rs"
+
+[[bin]]
+name = "ssx-bevy"
+path = "src/bin/viewer.rs"
+required-features = ["viewer"]
+
+[[bin]]
+name = "ssx-play"
+path = "src/bin/play_game.rs"
+required-features = ["viewer"]
+
+[profile.dev]
+opt-level = 1
+debug = 0
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[[example]]
+name = "prepare_skyboxes"
+required-features = ["viewer"]
+
+[[example]]
+name = "inspect_sky"
+required-features = ["viewer"]
+
+

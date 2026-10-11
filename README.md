@@ -13,6 +13,8 @@ Figured id hop on the recon bandwagon. In its current state this is a recon of t
 
 ## Build
 
+Requires Git LFS assets (`git lfs pull`).
+
 ```powershell
 cargo build --release --locked --features viewer --bin ssx-play
 ```

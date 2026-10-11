@@ -1,0 +1,35 @@
+0012a628 lwc1 f0,0x38(a0)
+0012a62c abs.S f1,f12
+0012a630 lui at,0x3f80
+0012a634 mtc1 at,f2
+0012a638 add.S f0,f0,f1
+0012a63c c.lt.S f2,f0
+0012a640 nop
+0012a644 bc1f 0x0012a650
+0012a648 _swc1 f0,0x38(a0)
+0012a64c swc1 f2,0x38(a0)
+0012a650 lwc1 f1,0x3c(a0)
+0012a654 clear f0
+0012a658 nop
+0012a65c c.eq.S f1,f0
+0012a660 nop
+0012a664 bc1f 0x0012a688
+0012a668 _nop
+0012a66c c.lt.S f12,f0
+0012a670 nop
+0012a674 bc1f 0x0012a6a4
+0012a678 _lwc1 f0,0x38(a0)
+0012a67c lwc1 f1,-0x7488(gp)
+0012a680 b 0x0012a6ac
+0012a684 _mul.S f0,f0,f1
+0012a688 c.lt.S f1,f0
+0012a68c nop
+0012a690 bc1f 0x0012a6a4
+0012a694 _lwc1 f0,0x38(a0)
+0012a698 lwc1 f1,-0x7484(gp)
+0012a69c b 0x0012a6ac
+0012a6a0 _mul.S f0,f0,f1
+0012a6a4 lwc1 f1,-0x7480(gp)
+0012a6a8 mul.S f0,f0,f1
+0012a6ac jr ra
+0012a6b0 _swc1 f0,0x3c(a0)

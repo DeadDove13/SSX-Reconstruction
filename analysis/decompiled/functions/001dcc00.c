@@ -1,0 +1,110 @@
+/* Ghidra pseudocode. PS2 address: 001dcc00. Not validated source. */
+
+undefined4
+FUN_001dcc00(int param_1,undefined1 (*param_2) [16],undefined1 (*param_3) [16],
+            undefined1 (*param_4) [16],undefined1 (*param_5) [16])
+
+{
+  undefined1 in_vf0 [16];
+  undefined1 auVar1 [16];
+  undefined1 auVar2 [16];
+  undefined1 auVar3 [16];
+  undefined4 uVar4;
+  undefined4 uStack_50;
+  undefined4 uStack_4c;
+  undefined4 uStack_48;
+  undefined4 uStack_44;
+  undefined4 uStack_10;
+  undefined4 uStack_c;
+  undefined4 uStack_8;
+  undefined4 uStack_4;
+  
+  auVar1 = _qmtc2(*(undefined4 *)(param_1 + 0x3c));
+  _vdiv(in_vf0,0,auVar1,0);
+  auVar1 = _lqc2(*param_2);
+  uVar4 = _vwaitq();
+  auVar1 = _vmulq(auVar1,uVar4);
+  auVar1 = _sqc2(auVar1);
+  uStack_50 = auVar1._0_4_;
+  uStack_4c = auVar1._4_4_;
+  uStack_48 = auVar1._8_4_;
+  uStack_44 = auVar1._12_4_;
+  *(undefined4 *)(param_1 + 0x60) = uStack_50;
+  *(undefined4 *)(param_1 + 100) = uStack_4c;
+  *(undefined4 *)(param_1 + 0x68) = uStack_48;
+  *(undefined4 *)(param_1 + 0x6c) = uStack_44;
+  auVar1 = _qmtc2(*(undefined4 *)(param_1 + 0x3c));
+  _vdiv(in_vf0,0,auVar1,0);
+  auVar1 = _lqc2(*param_3);
+  uVar4 = _vwaitq();
+  auVar1 = _vmulq(auVar1,uVar4);
+  auVar1 = _sqc2(auVar1);
+  uStack_50 = auVar1._0_4_;
+  uStack_4c = auVar1._4_4_;
+  uStack_48 = auVar1._8_4_;
+  uStack_44 = auVar1._12_4_;
+  *(undefined4 *)(param_1 + 0x70) = uStack_50;
+  *(undefined4 *)(param_1 + 0x74) = uStack_4c;
+  *(undefined4 *)(param_1 + 0x78) = uStack_48;
+  *(undefined4 *)(param_1 + 0x7c) = uStack_44;
+  auVar1 = _qmtc2(*(undefined4 *)(param_1 + 0x3c));
+  _vdiv(in_vf0,0,auVar1,0);
+  auVar1 = _lqc2(*param_4);
+  uVar4 = _vwaitq();
+  auVar1 = _vmulq(auVar1,uVar4);
+  auVar1 = _sqc2(auVar1);
+  uStack_50 = auVar1._0_4_;
+  uStack_4c = auVar1._4_4_;
+  uStack_48 = auVar1._8_4_;
+  uStack_44 = auVar1._12_4_;
+  *(undefined4 *)(param_1 + 0x80) = uStack_50;
+  *(undefined4 *)(param_1 + 0x84) = uStack_4c;
+  *(undefined4 *)(param_1 + 0x88) = uStack_48;
+  *(undefined4 *)(param_1 + 0x8c) = uStack_44;
+  auVar1 = _qmtc2(*(undefined4 *)(param_1 + 0x3c));
+  _vdiv(in_vf0,0,auVar1,0);
+  auVar1 = _lqc2(*param_5);
+  uVar4 = _vwaitq();
+  auVar1 = _vmulq(auVar1,uVar4);
+  auVar1 = _sqc2(auVar1);
+  uStack_50 = auVar1._0_4_;
+  uStack_4c = auVar1._4_4_;
+  uStack_48 = auVar1._8_4_;
+  uStack_44 = auVar1._12_4_;
+  *(undefined4 *)(param_1 + 0x90) = uStack_50;
+  *(undefined4 *)(param_1 + 0x94) = uStack_4c;
+  *(undefined4 *)(param_1 + 0x98) = uStack_48;
+  *(undefined4 *)(param_1 + 0x9c) = uStack_44;
+  auVar1 = _qmtc2(*(undefined4 *)(param_1 + 0x3c));
+  _vdiv(in_vf0,0,auVar1,0);
+  auVar1 = _lqc2(*param_2);
+  uVar4 = _vwaitq();
+  auVar1 = _vmulq(auVar1,uVar4);
+  auVar1 = _sqc2(auVar1);
+  auVar2 = _lqc2(*(undefined1 (*) [16])(param_1 + 0x70));
+  auVar3 = _lqc2(*(undefined1 (*) [16])(param_1 + 0x80));
+  auVar2 = _vadd(auVar2,auVar3);
+  auVar2 = _sqc2(auVar2);
+  auVar2 = _lqc2(auVar2);
+  auVar3 = _lqc2(*(undefined1 (*) [16])(param_1 + 0x90));
+  auVar2 = _vadd(auVar2,auVar3);
+  auVar2 = _sqc2(auVar2);
+  auVar3 = _lqc2(auVar2);
+  auVar2 = _qmtc2(0x3fc00000);
+  auVar2 = _vmulbc(auVar3,auVar2);
+  auVar2 = _sqc2(auVar2);
+  auVar1 = _lqc2(auVar1);
+  auVar2 = _lqc2(auVar2);
+  auVar1 = _vsub(auVar1,auVar2);
+  auVar1 = _sqc2(auVar1);
+  uStack_10 = auVar1._0_4_;
+  uStack_c = auVar1._4_4_;
+  uStack_8 = auVar1._8_4_;
+  uStack_4 = auVar1._12_4_;
+  *(undefined4 *)(param_1 + 0x60) = uStack_10;
+  *(undefined4 *)(param_1 + 100) = uStack_c;
+  *(undefined4 *)(param_1 + 0x68) = uStack_8;
+  *(undefined4 *)(param_1 + 0x6c) = uStack_4;
+  return *(undefined4 *)(param_1 + 0x3c);
+}
+

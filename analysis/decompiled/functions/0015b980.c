@@ -1,0 +1,102 @@
+/* Ghidra pseudocode. PS2 address: 0015b980. Not validated source. */
+
+void FUN_0015b980(undefined8 param_1)
+
+{
+  undefined4 uVar1;
+  undefined4 uVar2;
+  undefined4 *puVar3;
+  undefined4 *puVar4;
+  int iVar5;
+  undefined4 *puVar6;
+  undefined4 uVar7;
+  
+  FUN_0015f150(param_1,4);
+  puVar6 = (undefined4 *)param_1;
+  puVar6[5] = 0;
+  puVar6[0x10d] = 0x3fc00000;
+  puVar6[0x11d] = puVar6[5];
+  puVar6[0x107] = 0;
+  puVar6[0x108] = 0;
+  puVar6[0x109] = 0;
+  puVar6[0x10a] = 0;
+  puVar3 = puVar6 + 0x13c;
+  puVar6[0x10c] = 0;
+  puVar4 = puVar6 + 0x133;
+  puVar6[0x10b] = 0;
+  iVar5 = 0xf;
+  puVar6[0x11a] = 0;
+  puVar6[0x11b] = 0;
+  puVar6[1] = 1;
+  puVar6[4] = 4;
+  puVar6[0x11e] = puVar6[0x108];
+  *puVar6 = 1;
+  puVar6[2] = 0;
+  puVar6[0x11f] = puVar6[0x109];
+  puVar6[0x3e3] = 0;
+  puVar6[0x3e5] = 0;
+  puVar6[0x120] = puVar6[0x10a];
+  puVar6[10] = 0;
+  puVar6[0xb] = 0;
+  puVar6[0xc] = 0;
+  puVar6[0x75] = 0;
+  puVar6[0x80] = 0;
+  puVar6[0x104] = 0;
+  puVar6[0x3e6] = 0;
+  puVar6[0xe] = 0;
+  puVar6[0x3e4] = 0;
+  puVar6[0x121] = puVar6[0x10b];
+  puVar6[0x122] = puVar6[0x10c];
+  puVar6[0x129] = puVar6[0x113];
+  puVar6[0x123] = puVar6[0x10d];
+  puVar6[0x12a] = puVar6[0x114];
+  puVar6[0x124] = puVar6[0x10e];
+  puVar6[299] = puVar6[0x115];
+  puVar6[0x125] = puVar6[0x10f];
+  puVar6[0x12d] = puVar6[0x117];
+  puVar6[0x126] = puVar6[0x110];
+  puVar6[300] = puVar6[0x116];
+  puVar6[0x127] = puVar6[0x111];
+  puVar6[0x128] = puVar6[0x112];
+  puVar6[0x12e] = puVar6[0x118];
+  puVar6[0x12f] = puVar6[0x119];
+  puVar6[0x130] = puVar6[0x11a];
+  puVar6[0x131] = puVar6[0x11b];
+  puVar6[0x132] = puVar6[0x11c];
+  do {
+    iVar5 = iVar5 + -1;
+    uVar1 = puVar6[0x113];
+    *puVar4 = puVar6[0x107];
+    puVar3[3] = uVar1;
+    uVar1 = puVar6[0x114];
+    puVar4[1] = puVar6[0x108];
+    puVar3[4] = uVar1;
+    uVar1 = puVar6[0x115];
+    puVar4[2] = puVar6[0x109];
+    puVar3[5] = uVar1;
+    uVar1 = puVar6[0x116];
+    puVar4[3] = puVar6[0x10a];
+    uVar2 = puVar6[0x117];
+    uVar7 = puVar6[0x10b];
+    puVar3[6] = uVar1;
+    puVar4[4] = uVar7;
+    puVar4[5] = puVar6[0x10c];
+    puVar4[6] = puVar6[0x10d];
+    puVar4[7] = puVar6[0x10e];
+    puVar4[8] = puVar6[0x10f];
+    puVar4 = puVar4 + 0x16;
+    *puVar3 = puVar6[0x110];
+    puVar3[1] = puVar6[0x111];
+    puVar3[2] = puVar6[0x112];
+    puVar3[7] = uVar2;
+    uVar1 = puVar6[0x11c];
+    puVar3[8] = puVar6[0x118];
+    puVar3[0xc] = uVar1;
+    puVar3[9] = puVar6[0x119];
+    puVar3[10] = puVar6[0x11a];
+    puVar3[0xb] = puVar6[0x11b];
+    puVar3 = puVar3 + 0x16;
+  } while (-1 < iVar5);
+  return;
+}
+
