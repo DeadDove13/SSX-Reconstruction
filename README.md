@@ -4,7 +4,7 @@
 
 Figured id hop on the recon bandwagon. In its current state this is a recon of the core game loop and physics engine.
 
-This recon was build using the PS2 .iso file.
+This recon was built using the PS2 .iso file.
 
 ### TODO
 
