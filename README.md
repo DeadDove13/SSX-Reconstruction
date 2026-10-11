@@ -2,7 +2,7 @@
 
 ## Status
 
-Figured it hop on the recon bandwagon. In its current state this is a recon of the core game loop and physics engine.
+Figured id hop on the recon bandwagon. In its current state this is a recon of the core game loop and physics engine.
 
 ### TODO
 
