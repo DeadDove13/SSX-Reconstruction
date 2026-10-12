@@ -4,7 +4,7 @@
 
 This is a reconstruction of the PS2 game SSX in Rust and Bevy. The core game loop and physics are in place, but the project is still in progress.
 
-## Showcasew
+## Showcase
 You can view a showcase of the game [here.](https://www.youtube.com/watch?v=EMrMPJhCuuQ)
 
 ## How it’s made
