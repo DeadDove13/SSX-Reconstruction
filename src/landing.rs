@@ -7,7 +7,7 @@ pub enum Quality {
     Bail,
 }
 /// Impact bands from 0x00110cb0, constants 0x002c1344 and 0x002c134c.
-/// The host supplies contact-normal speed and board-up alignment.
+/// The caller supplies the collision response magnitude, not incoming speed.
 pub fn impact(speed: f32, alignment: f32) -> Quality {
     let limit = 833.3333 * alignment.clamp(0., 1.);
     if speed > limit + 1944.4443 {
@@ -18,19 +18,14 @@ pub fn impact(speed: f32, alignment: f32) -> Quality {
         Quality::Clean
     }
 }
-/// Host landing tolerance. Judge the approach against the receiving slope,
-/// rather than treating the previous takeoff normal as board misalignment.
+/// Upright board contact using the response magnitude in 0x00110940.
+/// At 0x00110b1c..38, the response is half the inward speed, with a
+/// 55.555553 floor. Passing full speed made ordinary landings too severe.
+/// Board orientation is evaluated separately by the host trick adapter.
 #[cfg(feature = "viewer")]
 pub fn contact(velocity: bevy::math::Vec3, normal: bevy::math::Vec3) -> Quality {
     let inward = (-velocity.dot(normal)).max(0.);
-    let horizontal = velocity.with_z(0.).normalize_or_zero();
-    let downhill = normal.dot(horizontal) / normal.z.max(0.05);
-    let shallow = inward / velocity.length().max(1.) <= 25f32.to_radians().sin();
-    if downhill >= 10f32.to_radians().tan() && shallow && inward <= 1500. {
-        Quality::Clean
-    } else {
-        impact(inward / 1.15, 1.)
-    }
+    impact((inward * 0.5).max(55.555553), 1.)
 }
 /// Temporary orientation gates, pending the full 0x00114f78 state adapter.
 pub fn orientation(spin: f32, flip: f32) -> Quality {

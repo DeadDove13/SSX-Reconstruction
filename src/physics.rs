@@ -12,6 +12,10 @@ use recovered::*;
 
 /// The state handlers multiply this value by rider field +0xa4.
 pub const BASE_STEP_SECONDS: f32 = f32::from_bits(0x3c888889);
+/// 0x001099f0 subtracts DAT_002c11e0 once per 60 Hz input step.
+pub const BOOST_DRAIN_PER_SECOND: f32 = f32::from_bits(0x3a209ad2) * 60.;
+/// Signed tangent acceleration in 0x00140b10, DAT_002c21ec/002c21f0.
+pub const RAIL_BOOST_ACCELERATION: f32 = 2500.;
 
 /// Ground-handler bank contribution (0x00113040 and 0x0013fe28..0x0013ff60).
 /// Returns normal and lateral components. Positive input banks toward normal x forward.

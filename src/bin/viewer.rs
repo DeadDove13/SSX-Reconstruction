@@ -22,10 +22,10 @@ mod lighting;
 mod performance;
 #[path = "viewer/play.rs"]
 mod play;
-#[path = "viewer/textures.rs"]
-mod textures;
 #[path = "viewer/sky.rs"]
 mod sky;
+#[path = "viewer/textures.rs"]
+mod textures;
 use lighting::CourseMaterial;
 
 #[derive(Resource)]
@@ -75,13 +75,23 @@ fn main() {
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--mute" => {}
-            a if a.starts_with("--test-resolution=") => {}
+            a if a.starts_with("--test-resolution=")
+                || a.starts_with("--test-camera=")
+                || a.starts_with("--test-rider=")
+                || a.starts_with("--test-board-style=") => {}
             "--play" => test_play = true,
             "--race-feedback-smoke-test"
             | "--menu-smoke-test"
             | "--video-smoke-test"
             | "--perf-test" => test_play = true,
-            "--smoke-test" | "--recovery-smoke-test" => {
+            "--smoke-test"
+            | "--recovery-smoke-test"
+            | "--world-animation-smoke-test"
+            | "--start-animation-smoke-test" => {
+                test_play = true;
+                smoke = true;
+            }
+            "--pickup-feedback-smoke-test" => {
                 test_play = true;
                 smoke = true;
             }
@@ -193,7 +203,10 @@ fn main() {
     .add_plugins(MaterialPlugin::<CourseMaterial>::default())
     .add_plugins(desktop::plugin)
     .add_systems(Startup, setup)
-    .add_systems(PostUpdate, sky::follow_camera.before(bevy::transform::TransformSystems::Propagate))
+    .add_systems(
+        PostUpdate,
+        sky::follow_camera.before(bevy::transform::TransformSystems::Propagate),
+    )
     .add_systems(Update, (move_camera, capture_frame));
     if std::env::args().any(|a| a == "--perf-test") {
         app.add_plugins(bevy::render::diagnostic::RenderDiagnosticsPlugin);
@@ -321,8 +334,14 @@ fn spawn_track(
             let local_normals = local.inverse().transpose();
             let world_normals = transform.inverse().transpose();
             let texture = track.level.material_textures[object.material];
-            let dynamic =
-                instance.properties.effect_slot >= 0 || instance.properties.flags & 1 == 0;
+            let dynamic = instance.properties.effect_slot >= 0
+                || instance.properties.flags & 1 == 0
+                || object.animation.is_some()
+                || track
+                    .level
+                    .object_names
+                    .get(index)
+                    .is_some_and(|n| n.starts_with("startlightshang_"));
             let surface = grouped
                 .entry((
                     texture,
@@ -368,13 +387,38 @@ fn spawn_track(
     let draw_calls = grouped.len();
     let mut material_handles = BTreeMap::new();
     for ((texture, lightmap, object, _), surface) in grouped {
+        let beam = object.is_some_and(|(i, _)| {
+            track
+                .level
+                .object_names
+                .get(i)
+                .is_some_and(|n| n.starts_with("floodlightBeam"))
+        });
+        let start_light = object.is_some_and(|(i, _)| {
+            track
+                .level
+                .object_names
+                .get(i)
+                .is_some_and(|n| n.starts_with("startlightshang_"))
+        });
         let material = material_handles
-            .entry((texture, lightmap))
+            .entry((texture, lightmap, beam, start_light))
             .or_insert_with(|| {
                 materials.add(CourseMaterial {
                     texture: handles[texture].clone(),
                     lightmap: lightmap.map(|index| lightmaps[index].clone()),
-                    parameters: Vec4::new(if lightmap.is_some() { 1. } else { 0. }, 0.1, 0., 0.),
+                    parameters: Vec4::new(
+                        if lightmap.is_some() { 1. } else { 0. },
+                        if beam { 0. } else { 0.1 },
+                        if beam {
+                            1.
+                        } else if start_light {
+                            2.
+                        } else {
+                            0.
+                        },
+                        if beam { 0.3 } else { 0. },
+                    ),
                 })
             })
             .clone();
@@ -409,6 +453,7 @@ fn spawn_track(
                 index,
                 part,
                 pivot,
+                bounds: [low, high],
                 initially_visible: track.level.instances[index].properties.flags & 1 != 0,
             });
             if track.level.instances[index].properties.flags & 1 == 0 {

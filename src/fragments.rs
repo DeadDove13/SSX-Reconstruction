@@ -1,6 +1,30 @@
 //! Original fragment settings and mesh pivots, with a deterministic host random seed.
 use crate::object_rules::FragmentEffect;
 use bevy::math::{Quat, Vec3};
+/// Keep debris above terrain using the rotated mesh bounds in original units.
+pub fn ground_offset(
+    terrain: &crate::playtest::TerrainContact,
+    bounds: [Vec3; 2],
+    pivot: Vec3,
+    rotation: Quat,
+    offset: Vec3,
+) -> Vec3 {
+    let mut lift = 0f32;
+    for x in [bounds[0].x, bounds[1].x] {
+        for y in [bounds[0].y, bounds[1].y] {
+            for z in [bounds[0].z, bounds[1].z] {
+                let point = pivot + rotation * (Vec3::new(x, y, z) - pivot) + offset;
+                // Start above the original prop so a fast falling piece cannot
+                // pass below the query before the next rendered frame.
+                let high = bounds[1].z.max(point.z) + 100.;
+                if let Some(hit) = terrain.below(point.with_z(high), point.z - 200.) {
+                    lift = lift.max(hit.height + 1. - point.z);
+                }
+            }
+        }
+    }
+    offset + Vec3::Z * lift
+}
 fn random(seed: &mut u32) -> f32 {
     *seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
     (*seed >> 8) as f32 / 16777216.

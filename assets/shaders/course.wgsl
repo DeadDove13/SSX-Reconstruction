@@ -28,5 +28,14 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 #ifdef VERTEX_COLORS
     rgb *= in.color.rgb;
 #endif
-    return vec4<f32>(display_to_linear(clamp(rgb, vec3<f32>(0.0), vec3<f32>(1.0))), 1.0);
+    if parameters.z > 1.5 {
+        // Countdown lamp artwork contains red, amber and green lens pixels.
+        let red = rgb.r > rgb.g * 1.45 && rgb.r > rgb.b * 1.5;
+        let amber = rgb.r > rgb.b * 1.8 && rgb.g > rgb.b * 1.8 && !red;
+        let green = rgb.g > rgb.r * 1.2 && rgb.g > rgb.b * 1.25;
+        let lit = (red && parameters.w >= 1.0) || (amber && parameters.w >= 2.0) || (green && parameters.w >= 3.0);
+        if red || amber || green { rgb *= select(0.16, 1.35, lit); }
+    }
+    let alpha = select(1.0, texel.a * parameters.w, parameters.z > 0.5 && parameters.z < 1.5);
+    return vec4<f32>(display_to_linear(clamp(rgb, vec3<f32>(0.0), vec3<f32>(1.0))), alpha);
 }

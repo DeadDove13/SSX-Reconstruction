@@ -59,6 +59,10 @@ pub struct State {
     rotation_boost: bool,
     pub charge: f32,
     pub active: bool,
+    /// Visual duration of the timed start impulse. No charge is consumed.
+    pub start_boost: f32,
+    pub pickup_serial: u32,
+    pub last_pickup: (u16, f32),
     pub message: String,
     pub message_time: f32,
     pub bonus: u32,
@@ -88,6 +92,8 @@ impl State {
             _ => return,
         }
         self.message_time = 2.;
+        self.pickup_serial = self.pickup_serial.wrapping_add(1);
+        self.last_pickup = (kind, value);
     }
 
     /// 0x0013ae18 consumes field B0 and scales the starting rotation by 1.6.
@@ -118,9 +124,10 @@ impl State {
         }
         self.active = request && grounded && !recovering && self.charge > 0.;
         if self.active {
-            self.charge = (self.charge - dt * 0.22).max(0.);
+            self.charge = (self.charge - dt * crate::physics::BOOST_DRAIN_PER_SECOND).max(0.);
         }
         self.super_boost = (self.super_boost - dt).max(0.);
+        self.start_boost = (self.start_boost - dt).max(0.);
         self.sparkle_time = (self.sparkle_time - dt).max(0.);
         self.message_time = (self.message_time - dt).max(0.);
         self.bonus_time = (self.bonus_time - dt).max(0.);

@@ -64,6 +64,16 @@ pub fn start() -> Cue {
         ttl: 2.,
     }
 }
+/// Main-bank sample selection recovered from 0x00201dc0.
+pub fn multiplier_sample(value: f32) -> usize {
+    if value >= 5. {
+        118
+    } else if value >= 3. {
+        117
+    } else {
+        116
+    }
+}
 pub fn landing(event: &Landing) -> Option<Cue> {
     if event.bailed {
         return Some(Cue {

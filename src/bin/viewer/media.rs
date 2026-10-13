@@ -93,6 +93,7 @@ pub struct Media {
     last_rank: usize,
     last_recovering: bool,
     holeshot_checked: bool,
+    pickup_serial: u32,
 }
 #[derive(Component)]
 pub struct MusicVoice;
@@ -345,6 +346,7 @@ pub fn setup(
         last_rank: 0,
         last_recovering: false,
         holeshot_checked: false,
+        pickup_serial: 0,
     });
 }
 fn category(surface: u32) -> usize {
@@ -391,6 +393,7 @@ pub fn tick(
         media.last_rank = 0;
         media.last_recovering = false;
         media.holeshot_checked = false;
+        media.pickup_serial = world.session.power.pickup_serial;
         media.cooldown = 0.;
         media.pending.clear();
         return;
@@ -399,6 +402,26 @@ pub fn tick(
     if running {
         media.cooldown = (media.cooldown - 1. / 60.).max(0.);
         media.pending.tick(1. / 60.);
+        if media.pickup_serial != world.session.power.pickup_serial {
+            media.pickup_serial = world.session.power.pickup_serial;
+            let (kind, value) = world.session.power.last_pickup;
+            if kind == 13 {
+                let id = ssx_rust::announcer::multiplier_sample(value);
+                if let Some(Some(clip)) = media.main.get(id) {
+                    commands.spawn((
+                        super::audio::GameVoice { position: None },
+                        AudioPlayer::new(clip.clone()),
+                        PlaybackSettings::DESPAWN
+                            .with_volume(Volume::Linear(menu.audio_gain(menu.settings.effects))),
+                    ));
+                }
+            }
+            if kind == 17 {
+                media
+                    .pending
+                    .push(ssx_rust::announcer::Cue::new("boost_icon", vec![0]));
+            }
+        }
     }
     let cat = category(world.session.surface);
     let mut has_music = false;

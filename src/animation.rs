@@ -9,6 +9,8 @@ pub struct Frame {
 #[derive(Debug, Clone)]
 pub struct Track {
     pub header: usize,
+    /// Root descriptor for this clip. Child order varies between banks.
+    pub group: usize,
     pub name: String,
     pub model: u8,
     pub fps: u8,
@@ -23,10 +25,12 @@ pub fn decode(data: &[u8]) -> Result<Vec<Track>> {
     let count = u32le(data, 12)? as usize;
     range(data, headers, count * 44)?;
     let mut tracks = Vec::new();
+    let mut group = 0;
     for i in 0..count {
         let h = headers + i * 44;
         let stride = u32le(data, h + 8)? as usize;
         if stride == 0 {
+            group = i;
             continue;
         }
         let packed = data[h + 14];
@@ -46,6 +50,7 @@ pub fn decode(data: &[u8]) -> Result<Vec<Track>> {
         range(data, offset, count * stride)?;
         let mut track = Track {
             header: i,
+            group,
             name: String::from_utf8_lossy(&data[h..h + 4]).into_owned(),
             model: data[h + 15],
             fps: data[h + 12] & 31,
@@ -84,4 +89,20 @@ pub fn decode(data: &[u8]) -> Result<Vec<Track>> {
         tracks.push(track);
     }
     Ok(tracks)
+}
+
+/// Packed bank/descriptor lookup used by 0x001478c8. Styles are Bx, Fr, Ex.
+pub fn action(action: usize, style: i32) -> (usize, usize) {
+    let packed = crate::animation_actions::ACTIONS[action][style.clamp(0, 2) as usize];
+    ((packed & 63) as usize, (packed >> 6) as usize)
+}
+
+pub fn state(state: usize, style: i32) -> (usize, usize) {
+    action(crate::animation_actions::STATES[state][0] as usize, style)
+}
+
+/// Choose by model ID, not child position. Character-specific banks include
+/// face and accessory tracks between the body and board.
+pub fn track(tracks: &[Track], group: usize, model: u8) -> Option<&Track> {
+    tracks.iter().find(|t| t.group == group && t.model == model)
 }

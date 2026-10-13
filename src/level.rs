@@ -52,6 +52,8 @@ impl Patch {
 
 #[derive(Debug)]
 pub struct Level {
+    /// Authored MAP names, indexed by WDF instance. Empty when MAP is absent.
+    pub object_names: Vec<String>,
     pub rails: Vec<crate::splines::Spline>,
     pub lightmaps: Vec<crate::texture::Texture>,
     pub patches: Vec<Patch>,
@@ -219,6 +221,7 @@ pub fn decode(wdx: &[u8], wdf: &[u8]) -> Result<Level> {
         object_triangles: 0,
     };
     Ok(Level {
+        object_names: Vec::new(),
         rails: crate::splines::decode(wdx, wdf)?,
         lightmaps: vec![],
         patches,

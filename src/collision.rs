@@ -11,6 +11,16 @@ const CELL: f32 = 500.;
 struct Triangle {
     p: [Vec3; 3],
     object: Option<usize>,
+    underside_only: bool,
+}
+impl Triangle {
+    fn accepts_side(self, point: Vec3) -> bool {
+        if !self.underside_only {
+            return true;
+        }
+        let n = (self.p[1] - self.p[0]).cross(self.p[2] - self.p[0]);
+        (point - self.p[0]).dot(n) * n.z <= 0.
+    }
 }
 #[derive(Clone, Copy, Debug)]
 pub struct Hit {
@@ -22,8 +32,17 @@ pub struct Hit {
 pub struct CollisionWorld {
     triangles: Vec<Triangle>,
     grid: HashMap<(i32, i32), Vec<usize>>,
+    animated: Vec<AnimatedPart>,
     pub properties: Vec<Properties>,
     pub scripts: Scripts,
+}
+struct AnimatedPart {
+    object: usize,
+    part: usize,
+    first: usize,
+    base: Vec<[Vec3; 3]>,
+    matrix: Mat4,
+    step: Mat4,
 }
 impl CollisionWorld {
     /// Camera occlusion uses visible object triangles, including decorative meshes.
@@ -37,7 +56,8 @@ impl CollisionWorld {
             let Some(meshes) = level.prefabs.get(instance.prefab) else {
                 continue;
             };
-            for mesh in meshes {
+            for (part, mesh) in meshes.iter().enumerate() {
+                let first = world.triangles.len();
                 let transform = placement
                     * mesh
                         .transform
@@ -51,6 +71,7 @@ impl CollisionWorld {
                         Some(index),
                     );
                 }
+                world.register_animation(level, index, part, first);
             }
         }
         world
@@ -99,6 +120,7 @@ impl CollisionWorld {
                         .get(p.collision_model as usize)
                     {
                         for (j, hull) in hulls.iter().enumerate() {
+                            let first = world.triangles.len();
                             let local = level
                                 .prefabs
                                 .get(instance.prefab)
@@ -117,17 +139,20 @@ impl CollisionWorld {
                                     Some(index),
                                 );
                             }
+                            world.register_animation(level, index, j, first);
                         }
                     }
                 }
                 2 => {
                     if let Some(meshes) = level.prefabs.get(instance.prefab) {
-                        for mesh in meshes {
+                        for (part, mesh) in meshes.iter().enumerate() {
+                            let first = world.triangles.len();
                             let local = mesh
                                 .transform
                                 .map(|m| Mat4::from_cols_array(&m))
                                 .unwrap_or(Mat4::IDENTITY);
                             world.add_box(mesh.bounds, placement * local, index);
+                            world.register_animation(level, index, part, first);
                         }
                     }
                 }
@@ -136,7 +161,8 @@ impl CollisionWorld {
                 // surface mesh instead of allowing these objects to be crossed.
                 3 => {
                     if let Some(meshes) = level.prefabs.get(instance.prefab) {
-                        for mesh in meshes {
+                        for (part, mesh) in meshes.iter().enumerate() {
+                            let first = world.triangles.len();
                             let local = mesh
                                 .transform
                                 .map(|m| Mat4::from_cols_array(&m))
@@ -151,6 +177,7 @@ impl CollisionWorld {
                                     Some(index),
                                 );
                             }
+                            world.register_animation(level, index, part, first);
                         }
                     }
                 }
@@ -158,6 +185,81 @@ impl CollisionWorld {
             }
         }
         world
+    }
+    fn register_animation(&mut self, level: &Level, object: usize, part: usize, first: usize) {
+        if level
+            .prefabs
+            .get(level.instances[object].prefab)
+            .and_then(|meshes| meshes.get(part))
+            .is_some_and(|m| m.animation.is_some())
+            && first < self.triangles.len()
+        {
+            self.animated.push(AnimatedPart {
+                object,
+                part,
+                first,
+                base: self.triangles[first..].iter().map(|t| t.p).collect(),
+                matrix: Mat4::IDENTITY,
+                step: Mat4::IDENTITY,
+            });
+        }
+    }
+    /// Reindex only moved object triangles. Terrain remains in the static grid.
+    pub fn animate(&mut self, level: &Level, state: &crate::object_rules::ObjectState) {
+        for part in &mut self.animated {
+            let next = crate::object_animation::delta(level, state, part.object, part.part, 0.);
+            part.step = next * part.matrix.inverse();
+            if next == part.matrix {
+                part.step = Mat4::IDENTITY;
+                continue;
+            }
+            for (i, base) in part.base.iter().enumerate() {
+                let index = part.first + i;
+                let old = self.triangles[index].p;
+                for cell in triangle_cells(old) {
+                    if let Some(bucket) = self.grid.get_mut(&cell) {
+                        bucket.retain(|n| *n != index);
+                    }
+                }
+                let points = base.map(|p| next.transform_point3(p));
+                self.triangles[index].p = points;
+                for cell in triangle_cells(points) {
+                    self.grid.entry(cell).or_default().push(index);
+                }
+            }
+            part.matrix = next;
+        }
+    }
+    /// Carry a grounded board with the surface that supported it before this tick.
+    pub fn support_motion(&self, point: Vec3, disabled: &HashSet<usize>) -> Vec3 {
+        for part in &self.animated {
+            if part.step == Mat4::IDENTITY
+                || disabled.contains(&part.object)
+                || !self.properties[part.object].response_enabled()
+            {
+                continue;
+            }
+            let inverse = part.step.inverse();
+            for i in 0..part.base.len() {
+                let p = self.triangles[part.first + i]
+                    .p
+                    .map(|p| inverse.transform_point3(p));
+                let a = (p[1] - p[0]).truncate();
+                let b = (p[2] - p[0]).truncate();
+                let c = (point - p[0]).truncate();
+                let det = a.perp_dot(b);
+                if det.abs() < 0.001 {
+                    continue;
+                }
+                let u = c.perp_dot(b) / det;
+                let v = a.perp_dot(c) / det;
+                let height = p[0].z + u * (p[1].z - p[0].z) + v * (p[2].z - p[0].z);
+                if u >= 0. && v >= 0. && u + v <= 1. && (point.z - height - 2.).abs() < 6. {
+                    return part.step.transform_point3(point) - point;
+                }
+            }
+        }
+        Vec3::ZERO
     }
     fn add_box(&mut self, bounds: [[f32; 3]; 2], transform: Mat4, object: usize) {
         let points: [Vec3; 8] = std::array::from_fn(|i| {
@@ -200,7 +302,65 @@ impl CollisionWorld {
                 self.grid.entry((x, y)).or_default().push(index);
             }
         }
-        self.triangles.push(Triangle { p: points, object });
+        self.triangles.push(Triangle {
+            p: points,
+            object,
+            underside_only: false,
+        });
+    }
+    /// Block the body below a terrain roof. Board contact handles its upper side.
+    pub fn add_underside(&mut self, points: [Vec3; 3]) {
+        let index = self.triangles.len();
+        self.add(points, None);
+        if let Some(triangle) = self.triangles.get_mut(index) {
+            triangle.underside_only = true;
+        }
+    }
+    /// Sweep the board against reset faces, including stationary contact.
+    /// Trigger faces need contact but must not push the rider away.
+    pub fn reset_contacts(
+        &self,
+        from: Vec3,
+        to: Vec3,
+        radius: f32,
+        disabled: &HashSet<usize>,
+    ) -> Vec<usize> {
+        let low = from.min(to) - Vec3::splat(radius);
+        let high = from.max(to) + Vec3::splat(radius);
+        let mut visited = HashSet::new();
+        let mut objects = HashSet::new();
+        for y in (low.y / CELL).floor() as i32..=(high.y / CELL).floor() as i32 {
+            for x in (low.x / CELL).floor() as i32..=(high.x / CELL).floor() as i32 {
+                for &index in self.grid.get(&(x, y)).into_iter().flatten() {
+                    if !visited.insert(index) {
+                        continue;
+                    }
+                    let t = self.triangles[index];
+                    let Some(object) = t.object else { continue };
+                    if disabled.contains(&object) || objects.contains(&object) {
+                        continue;
+                    }
+                    let reset = self
+                        .scripts
+                        .contact_program(&self.properties[object])
+                        .and_then(|p| self.scripts.programs.get(p))
+                        .is_some_and(|p| p.iter().any(|e| e.kind == 12));
+                    if !reset {
+                        continue;
+                    }
+                    let n = (t.p[1] - t.p[0]).cross(t.p[2] - t.p[0]).normalize_or_zero();
+                    let plane = to - n * (to - t.p[0]).dot(n);
+                    let touching =
+                        (to - plane).length_squared() <= radius * radius && inside(plane, t.p, n);
+                    if touching || sweep_triangle(from, to - from, radius, t.p).is_some() {
+                        objects.insert(object);
+                    }
+                }
+            }
+        }
+        let mut result: Vec<_> = objects.into_iter().collect();
+        result.sort_unstable();
+        result
     }
     /// Highest solid object surface below the board. Material selection remains unported.
     pub fn ground_below(
@@ -282,6 +442,9 @@ impl CollisionWorld {
                     }
                     let n = (t.p[1] - t.p[0]).cross(t.p[2] - t.p[0]).normalize_or_zero();
                     let plane = point - n * (point - t.p[0]).dot(n);
+                    if !t.accepts_side(point) {
+                        continue;
+                    }
                     let nearest = if inside(plane, t.p, n) {
                         plane
                     } else {
@@ -340,7 +503,9 @@ impl CollisionWorld {
                     {
                         continue;
                     }
-                    if let Some((time, normal)) = sweep_triangle(start, delta, radius, t.p) {
+                    if t.accepts_side(start)
+                        && let Some((time, normal)) = sweep_triangle(start, delta, radius, t.p)
+                    {
                         if best.is_none_or(|h| time < h.time) {
                             best = Some(Hit {
                                 time,
@@ -354,6 +519,15 @@ impl CollisionWorld {
         }
         best
     }
+}
+
+fn triangle_cells(p: [Vec3; 3]) -> impl Iterator<Item = (i32, i32)> {
+    let low = p[0].min(p[1]).min(p[2]);
+    let high = p[0].max(p[1]).max(p[2]);
+    let x0 = (low.x / CELL).floor() as i32;
+    let x1 = (high.x / CELL).floor() as i32;
+    ((low.y / CELL).floor() as i32..=(high.y / CELL).floor() as i32)
+        .flat_map(move |y| (x0..=x1).map(move |x| (x, y)))
 }
 // Small slice helper keeps index conversion explicit.
 trait FaceArray {

@@ -745,11 +745,36 @@ fn setup(
     if world.smoke {
         menu.screen = Screen::Game;
     }
+    if std::env::args().any(|a| a == "--start-animation-smoke-test") {
+        menu.countdown = ssx_rust::race_feedback::COUNTDOWN_SECONDS;
+    }
     if std::env::args().any(|a| a == "--recovery-smoke-test") {
         menu.event = front_end::Event::Showoff;
     }
     if world.smoke || menu.automated() {
         menu.settings = Settings::default();
+    }
+    if std::env::args().any(|a| a == "--recovery-smoke-test") {
+        // Exercise both shared switch poses and the authored Alpine fakie clip.
+        let rider: usize = std::env::args()
+            .find_map(|a| a.strip_prefix("--test-rider=").map(str::to_owned))
+            .map(|s| s.parse().expect("Test rider index"))
+            .unwrap_or(0);
+        let style: i32 = std::env::args()
+            .find_map(|a| a.strip_prefix("--test-board-style=").map(str::to_owned))
+            .map(|s| s.parse().expect("Test board style"))
+            .unwrap_or(1);
+        menu.rider = rider;
+        world.rider = rider;
+        let equipment = &ssx_rust::equipment::catalog()[rider];
+        let board = equipment
+            .boards
+            .iter()
+            .position(|b| b.style == style as usize)
+            .unwrap();
+        menu.settings.boards[rider] = board;
+        world.session.board_style = style;
+        world.session.rider_stats = equipment.physics_stats(board);
     }
     if menu.automated() {
         if let Some(size) =
@@ -1157,7 +1182,7 @@ fn countdown(mut menu: ResMut<Menu>, mut world: ResMut<PlayWorld>, mut finished:
         if menu.event == Event::Race {
             for (i, opponent) in world.opponents.iter_mut().enumerate() {
                 // Shared rocking and reward rules. AI timing remains a host adapter.
-                let forward = menu.countdown < 0.29 + (i % 4) as f32 * 0.045;
+                let forward = ssx_rust::start_gate::opponent_forward(menu.countdown, i);
                 opponent.session.prime_start(ssx_rust::playtest::Controls {
                     push: forward,
                     brake: !forward,

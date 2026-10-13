@@ -53,7 +53,11 @@ impl Material for CourseMaterial {
         COURSE_SHADER.into()
     }
     fn alpha_mode(&self) -> AlphaMode {
-        AlphaMode::Mask(self.parameters.y)
+        if self.parameters.z > 0.5 && self.parameters.z < 1.5 {
+            AlphaMode::Blend
+        } else {
+            AlphaMode::Mask(self.parameters.y)
+        }
     }
     fn specialize(
         _: &MaterialPipeline,

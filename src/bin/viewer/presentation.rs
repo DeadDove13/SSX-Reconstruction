@@ -8,7 +8,7 @@ use bevy::{
     render::render_resource::{Extent3d, PrimitiveTopology, TextureDimension, TextureFormat},
 };
 use ssx_rust::{object_rules::ObjectEvent, playtest::Phase};
-const LIMIT: usize = 4096;
+const LIMIT: usize = 8192;
 const TEXTURES: usize = 34;
 // 0x001d7ce8 loads this order from 0x00296648. It differs from SSH directory order.
 const TEXTURE_NAMES: [&str; TEXTURES] = [
@@ -19,6 +19,20 @@ const TEXTURE_NAMES: [&str; TEXTURES] = [
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn brief_burst_emits_every_authored_particle() {
+        let mut words = vec![0u32; 52];
+        words[1] = 40;
+        words[3] = 0.01f32.to_bits();
+        let mut e = Emitter {
+            object: 0,
+            matrix: Mat4::IDENTITY,
+            words,
+            remaining: 0.01,
+            credit: 0.,
+        };
+        assert_eq!(e.emission_count(1. / 60.), 40);
+    }
     #[test]
     #[ignore = "requires the original disc"]
     fn texture_ids_match_original_particle_table() {
@@ -36,6 +50,8 @@ mod tests {
 }
 #[derive(Component)]
 pub struct Batch(usize);
+#[derive(Resource, Default)]
+pub struct RiderAnchors(pub [Option<[Vec3; 2]>; 8]);
 struct Particle {
     p: Vec3,
     v: Vec3,
@@ -47,6 +63,7 @@ struct Particle {
     end_colour: Vec4,
     texture: usize,
     tail: Option<Vec3>,
+    surface_normal: Option<Vec3>,
 }
 struct Emitter {
     object: usize,
@@ -55,8 +72,28 @@ struct Emitter {
     remaining: f32,
     credit: f32,
 }
+impl Emitter {
+    fn emission_count(&mut self, dt: f32) -> usize {
+        let duration = if f(&self.words, 3) < 0. {
+            (f(&self.words, 6) + f(&self.words, 8) * 0.5).max(0.001)
+        } else {
+            f(&self.words, 3).max(0.001)
+        };
+        let step = if f(&self.words, 3) < 0. {
+            dt
+        } else {
+            dt.min(self.remaining.max(0.))
+        };
+        self.credit += self.words[1].min(2048) as f32 * step / duration;
+        let count = (self.credit + 0.0001).floor() as usize;
+        self.credit -= count as f32;
+        count
+    }
+}
 #[derive(Resource, Default)]
 pub struct Effects {
+    trail_last: [Option<[Vec3; 2]>; 8],
+    snow_last: [Option<[Vec3; 2]>; 8],
     particles: Vec<Particle>,
     emitters: Vec<Emitter>,
     meshes: Vec<Handle<Mesh>>,
@@ -135,6 +172,7 @@ pub fn setup(
         ));
     }
     commands.insert_resource(fx);
+    commands.init_resource::<RiderAnchors>();
 }
 fn rng(state: &mut u32) -> f32 {
     *state = state.wrapping_mul(1664525).wrapping_add(1013904223);
@@ -152,6 +190,19 @@ fn v(w: &[u32], n: usize) -> Vec3 {
 }
 impl Effects {
     fn add(&mut self, p: Particle) {
+        // Reserve room for short bursts. Persistent snow tracks must not hide pickups.
+        if p.surface_normal.is_some() && self.particles.len() >= LIMIT - 1024 {
+            return;
+        }
+        if self.particles.len() >= LIMIT && p.surface_normal.is_none() {
+            if let Some(index) = self
+                .particles
+                .iter()
+                .position(|p| p.surface_normal.is_some())
+            {
+                self.particles.swap_remove(index);
+            }
+        }
         if self.particles.len() < LIMIT && p.p.is_finite() && p.v.is_finite() && p.life > 0. {
             self.emitted += 1;
             self.particles.push(p);
@@ -173,9 +224,12 @@ impl Effects {
             .clamp(1., 1200.)
             * 0.01;
         let life = (f(w, 6) + (rng(&mut self.random) - 0.5) * f(w, 8)).clamp(0.05, 30.);
-        let colour = Vec4::new(f(w, 35), f(w, 36), f(w, 37), f(w, 34)).clamp(Vec4::ZERO, Vec4::ONE);
-        let end_colour =
-            Vec4::new(f(w, 43), f(w, 44), f(w, 45), f(w, 42)).clamp(Vec4::ZERO, Vec4::ONE);
+        let colour = (Vec4::new(f(w, 35), f(w, 36), f(w, 37), f(w, 34))
+            + Vec4::new(f(w, 39), f(w, 40), f(w, 41), f(w, 38)) * (rng(&mut self.random) - 0.5))
+            .clamp(Vec4::ZERO, Vec4::ONE);
+        let end_colour = (Vec4::new(f(w, 43), f(w, 44), f(w, 45), f(w, 42))
+            + Vec4::new(f(w, 47), f(w, 48), f(w, 49), f(w, 46)) * (rng(&mut self.random) - 0.5))
+            .clamp(Vec4::ZERO, Vec4::ONE);
         self.add(Particle {
             p: super::super::world(e.matrix.transform_point3(pos).to_array()),
             v: super::super::world(e.matrix.transform_vector3(vel).to_array()),
@@ -187,6 +241,7 @@ impl Effects {
             end_colour,
             texture: w[50] as usize + if w[51] == 1 { TEXTURES } else { 0 },
             tail: None,
+            surface_normal: None,
         });
     }
 }
@@ -196,6 +251,7 @@ pub fn tick(
     menu: Res<Menu>,
     track: Res<super::super::Track>,
     mut fx: ResMut<Effects>,
+    anchors: Res<RiderAnchors>,
     mut audio: ResMut<Assets<AudioSource>>,
     mut voices: Query<(
         Entity,
@@ -211,6 +267,8 @@ pub fn tick(
         fx.key = Some(key);
         fx.particles.clear();
         fx.emitters.clear();
+        fx.trail_last = [None; 8];
+        fx.snow_last = [None; 8];
         fx.crowd_wait = 0.;
         fx.crowd = track
             .level
@@ -352,20 +410,10 @@ pub fn tick(
     let emitters = std::mem::take(&mut fx.emitters);
     for mut e in emitters {
         let continuous = f(&e.words, 3) < 0.;
-        // Negative lifetime means a persistent emitter in 0x001dfb38.
-        let duration = if continuous {
-            f(&e.words, 6) + f(&e.words, 8) * 0.5
-        } else {
-            f(&e.words, 3)
-        }
-        .max(1. / 60.);
-        let count = e.words[1].min(512) as f32;
-        e.credit += count / duration / 60.;
+        let count = e.emission_count(1. / 60.);
         let pos = e.matrix.transform_point3(v(&e.words, 10));
-        let visible = pos.distance(world.session.position) < 10000.;
-        while e.credit >= 1. {
-            e.credit -= 1.;
-            if visible {
+        if pos.distance(world.session.position) < 10000. {
+            for _ in 0..count {
                 fx.script_particle(&e);
             }
         }
@@ -392,42 +440,142 @@ pub fn tick(
             let speed = s.velocity.length();
             let side = s.forward.cross(s.normal).normalize_or_zero();
             let base = s.position - s.forward * 60. + s.normal * 4.;
-            if s.grounded && speed > 200. && s.surface < 12 && s.grind.is_none() {
-                for _ in 0..if s.recovery.is_some() { 5 } else { 2 } {
+            if s.grounded
+                && speed > 200.
+                && snow_surface(s.surface)
+                && s.grind.is_none()
+                && s.returning.is_none()
+                // Object support currently inherits the previous physics material.
+                // Require actual snow below the board before emitting snow effects.
+                && world.terrain.surface_contact(s.position, s.normal, 30.)
+                    .is_some_and(|(_, _, surface)| snow_surface(surface))
+            {
+                // Surface-aligned grooves remain on the snow after the spray disperses.
+                let mut marks = [Vec3::ZERO; 2];
+                let mut supported = true;
+                for (edge, sign) in [-1., 1.].into_iter().enumerate() {
+                    let Some((point, normal, surface)) =
+                        world
+                            .terrain
+                            .surface_contact(base + side * sign * 13., s.normal, 100.)
+                    else {
+                        supported = false;
+                        continue;
+                    };
+                    if !snow_surface(surface) {
+                        supported = false;
+                        continue;
+                    }
+                    let n = super::super::world(normal.to_array()).normalize_or_zero();
+                    let p = super::super::world((point + normal * 1.).to_array());
+                    marks[edge] = p;
+                    let Some(tail) = fx.snow_last[r].map(|last| last[edge]).filter(|tail| {
+                        let distance = tail.distance(p);
+                        distance > 0.01 && distance < 2.5
+                    }) else {
+                        continue;
+                    };
+                    fx.add(Particle {
+                        p,
+                        v: Vec3::ZERO,
+                        a: Vec3::ZERO,
+                        size: 0.035,
+                        age: 0.,
+                        life: 8.,
+                        colour: Vec4::new(0.48, 0.58, 0.68, 0.45),
+                        end_colour: Vec4::new(0.55, 0.7, 0.8, 0.),
+                        texture: 23,
+                        tail: Some(tail),
+                        surface_normal: Some(n),
+                    });
+                }
+                fx.snow_last[r] = supported.then_some(marks);
+                // Packed snow retains board marks without a powder cloud.
+                let spray = matches!(s.surface, 0 | 2 | 3);
+                for _ in 0..if !spray {
+                    0
+                } else if s.recovery.is_some() {
+                    3
+                } else {
+                    1
+                } {
                     let jitter = (rng(&mut fx.random) - 0.5) * 60.;
                     let vel = -s.velocity * 0.1
                         + side * jitter * 2.
                         + s.normal * (50. + rng(&mut fx.random) * 100.);
-                    let size = 0.12 + rng(&mut fx.random) * 0.24;
+                    let size = 0.07 + rng(&mut fx.random) * 0.1;
                     fx.add(Particle {
                         p: super::super::world((base + side * jitter).to_array()),
                         v: super::super::world(vel.to_array()),
                         a: Vec3::Y * -1.5,
                         size,
                         age: 0.,
-                        life: 0.5,
-                        colour: Vec4::new(0.85, 0.94, 1., 0.65),
+                        life: 0.35,
+                        colour: Vec4::new(0.85, 0.94, 1., 0.4),
                         end_colour: Vec4::new(0.9, 0.97, 1., 0.),
-                        texture: 13,
+                        texture: 10,
                         tail: None,
+                        surface_normal: None,
                     });
                 }
+            } else {
+                fx.snow_last[r] = None;
             }
-            if speed > 300. && (s.power.active || s.power.super_boost > 0. || s.grind.is_some()) {
-                for sign in [-1., 1.] {
-                    let p = super::super::world((base + side * sign * 28.).to_array());
+            if speed > 300.
+                && (s.power.active
+                    || s.power.super_boost > 0.
+                    || s.power.start_boost > 0.
+                    || s.grind.is_some())
+            {
+                let hands = anchors.0[r].unwrap_or_else(|| {
+                    [-1., 1.].map(|sign| {
+                        super::super::world((base + side * sign * 28. + s.normal * 65.).to_array())
+                    })
+                });
+                for (i, p) in hands.into_iter().enumerate() {
+                    let tail = fx.trail_last[r]
+                        .map(|v| v[i])
+                        .filter(|v| v.distance(p) < 2.5)
+                        .unwrap_or(p - super::super::world((s.velocity / 60.).to_array()));
                     fx.add(Particle {
                         p,
                         v: Vec3::ZERO,
                         a: Vec3::ZERO,
-                        size: 0.025,
+                        size: 0.085,
                         age: 0.,
-                        life: 0.36,
+                        life: 0.65,
                         colour: Vec4::new(1., 0.12, 0.035, 0.85),
                         end_colour: Vec4::new(1., 0.05, 0., 0.),
-                        texture: 23 + TEXTURES,
-                        tail: Some(p - super::super::world((s.velocity / 60.).to_array())),
+                        texture: 23,
+                        tail: Some(tail),
+                        surface_normal: None,
                     });
+                }
+                fx.trail_last[r] = Some(hands);
+            } else {
+                fx.trail_last[r] = None;
+            }
+            if s.power.sparkling()
+                && let Some(hands) = anchors.0[r]
+            {
+                for p in hands {
+                    for (texture, size, alpha) in
+                        [(28 + TEXTURES, 0.18, 0.85), (19 + TEXTURES, 0.12, 1.)]
+                    {
+                        fx.add(Particle {
+                            p,
+                            v: Vec3::ZERO,
+                            a: Vec3::ZERO,
+                            size,
+                            age: 0.,
+                            life: 1. / 60.,
+                            colour: Vec4::new(1., 1., 1., alpha),
+                            end_colour: Vec4::new(1., 1., 1., alpha),
+                            texture,
+                            tail: None,
+                            surface_normal: None,
+                        });
+                    }
                 }
             }
             if s.grind.is_some() || s.power.sparkling() {
@@ -452,6 +600,7 @@ pub fn tick(
                     end_colour: Vec4::new(1., 0.8, 1., 0.),
                     texture: if star { 19 + TEXTURES } else { 20 + TEXTURES },
                     tail: None,
+                    surface_normal: None,
                 });
             }
         }
@@ -467,6 +616,7 @@ pub fn render(
     let up = camera.rotation * Vec3::Y;
     let mut positions = vec![Vec::<[f32; 3]>::new(); fx.meshes.len()];
     let mut colours = vec![Vec::<[f32; 4]>::new(); fx.meshes.len()];
+    let mut uvs = vec![Vec::<[f32; 2]>::new(); fx.meshes.len()];
     for p in &fx.particles {
         if p.texture >= fx.meshes.len() {
             continue;
@@ -477,7 +627,7 @@ pub fn render(
             .to_array();
         let vertices = if let Some(tail) = p.tail {
             let edge = (p.p - tail)
-                .cross(camera.translation - p.p)
+                .cross(p.surface_normal.unwrap_or(camera.translation - p.p))
                 .normalize_or_zero()
                 * p.size;
             [tail - edge, tail + edge, p.p + edge, p.p - edge]
@@ -488,6 +638,13 @@ pub fn render(
         };
         positions[p.texture].extend(vertices.map(|v| v.to_array()));
         colours[p.texture].extend([c; 4]);
+        // Sample the middle of the streak along travel. Repeating its tapered
+        // ends on every frame produces a dotted line instead of a snow groove.
+        uvs[p.texture].extend(if p.surface_normal.is_some() {
+            [[0., 0.5], [1., 0.5], [1., 0.5], [0., 0.5]]
+        } else {
+            [[0., 1.], [1., 1.], [1., 0.], [0., 0.]]
+        });
     }
     for (batch, mut visibility) in &mut batches {
         let n = positions[batch.0].len();
@@ -506,12 +663,7 @@ pub fn render(
             );
             m.insert_attribute(Mesh::ATTRIBUTE_COLOR, std::mem::take(&mut colours[batch.0]));
             m.insert_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0., 1., 0.]; n]);
-            m.insert_attribute(
-                Mesh::ATTRIBUTE_UV_0,
-                (0..n / 4)
-                    .flat_map(|_| [[0., 1.], [1., 1.], [1., 0.], [0., 0.]])
-                    .collect::<Vec<_>>(),
-            );
+            m.insert_attribute(Mesh::ATTRIBUTE_UV_0, std::mem::take(&mut uvs[batch.0]));
             m.insert_indices(Indices::U32(
                 (0..n as u32 / 4)
                     .flat_map(|i| [i * 4, i * 4 + 1, i * 4 + 2, i * 4, i * 4 + 2, i * 4 + 3])
@@ -519,4 +671,33 @@ pub fn render(
             ));
         }
     }
+}
+
+pub fn start_lights(
+    world: Res<PlayWorld>,
+    menu: Res<Menu>,
+    mut materials: ResMut<Assets<crate::lighting::CourseMaterial>>,
+) {
+    // Progressive illumination matched to the supplied countdown reference.
+    let stage = if menu.countdown > 3. {
+        1.
+    } else if menu.countdown > 2. {
+        2.
+    } else if menu.countdown > 0. || matches!(world.session.phase, Phase::Running | Phase::Finished)
+    {
+        3.
+    } else {
+        0.
+    };
+    for (_, material) in materials.iter_mut() {
+        if material.parameters.z == 2. {
+            material.parameters.w = stage;
+        }
+    }
+}
+
+/// Presentation policy based on the recovered powder/loose/packed categories
+/// in 0x001f8aa0. Ice, rock, wood, metal, glass and unknown IDs do not emit snow.
+fn snow_surface(surface: u32) -> bool {
+    matches!(surface, 0..=4 | 7 | 8)
 }

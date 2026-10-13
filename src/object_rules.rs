@@ -181,7 +181,9 @@ pub struct ObjectState {
     random: u32,
     pub damage: std::collections::HashMap<usize, f32>,
     damage_cooldown: std::collections::HashMap<usize, u32>,
+    trigger_cooldown: std::collections::HashMap<usize, u32>,
     pub rigid: std::collections::HashMap<usize, FragmentEffect>,
+    pub animations: std::collections::HashMap<usize, crate::object_animation::Playback>,
     pub disabled: std::collections::HashSet<usize>,
     pub activated_debris: std::collections::HashSet<usize>,
     pub events: Vec<ObjectEvent>,
@@ -309,6 +311,13 @@ impl ObjectState {
         self.contact_with_velocity(object, properties, scripts, [0.; 3]);
     }
     pub fn advance_effects(&mut self) {
+        self.trigger_cooldown.retain(|_, ticks| {
+            *ticks = ticks.saturating_sub(1);
+            *ticks > 0
+        });
+        for animation in self.animations.values_mut() {
+            animation.advance();
+        }
         self.damage_cooldown.retain(|_, ticks| {
             *ticks = ticks.saturating_sub(1);
             *ticks > 0
@@ -327,7 +336,7 @@ impl ObjectState {
         scripts: &Scripts,
         impact: [f32; 3],
     ) {
-        if self.disabled.contains(&object) {
+        if self.disabled.contains(&object) || self.trigger_cooldown.contains_key(&object) {
             return;
         }
         if let Some(program) = scripts.contact_program(&properties[object]) {
@@ -365,6 +374,15 @@ impl ObjectState {
             }
             *budget -= 1;
             match (command.kind, command.words.as_slice()) {
+                // Timed trigger actor, 0x00126a10 / 0x00126ac8. Keep the
+                // linked commands in this invocation, then suppress repeated contacts.
+                (0, [2, lifetime]) => {
+                    let lifetime = f32::from_bits(*lifetime);
+                    if lifetime.is_finite() && lifetime > 0. {
+                        self.trigger_cooldown
+                            .insert(object, (lifetime * 60.) as u32);
+                    }
+                }
                 // Breakable health: 0x0012b3d0, 0x0012b788, 0x0012b520.
                 // The caller supplies the contact-normal component of velocity.
                 (0, [14, _, health]) => {
@@ -413,8 +431,8 @@ impl ObjectState {
                         FragmentEffect {
                             age: 0,
                             lifetime: (f32::from_bits(*lifetime) * 60.).max(60.) as u32,
-                            gravity: 1. / 60.,
                             velocity: impact.map(|v| v * 0.65),
+                            gravity: 1. / 60.,
                             scatter: [0.; 3],
                         },
                     );
@@ -476,7 +494,30 @@ impl ObjectState {
                 // Constructors and virtual animation commands do not branch the VM.
                 // Existing collision/lift/render adapters own these actor types.
                 (0, [7 | 15 | 16 | 18 | 21, ..]) => {}
-                (0, [17 | 256..=259, ..]) | (1, [1 | 2, ..]) | (2 | 8 | 9 | 10, _) => {
+                (0, [256 | 257, ..]) => {
+                    if !self.animations.contains_key(&object) {
+                        self.random = self.random.wrapping_mul(1664525).wrapping_add(1013904223);
+                        if let Some(animation) =
+                            crate::object_animation::Playback::new(&command.words, self.random)
+                        {
+                            self.animations.insert(object, animation);
+                        }
+                    }
+                }
+                (2 | 8, [operation, value]) if self.animations.contains_key(&object) => {
+                    if !self
+                        .animations
+                        .get_mut(&object)
+                        .unwrap()
+                        .control(*operation, f32::from_bits(*value))
+                    {
+                        self.unsupported(object, program, command.kind);
+                    }
+                }
+                (10, [0]) if self.animations.contains_key(&object) => {
+                    self.animations.remove(&object);
+                }
+                (0, [17 | 258..=259, ..]) | (1, [1 | 2, ..]) | (2 | 8 | 9 | 10, _) => {
                     self.unsupported(object, program, command.kind);
                 }
                 // 0x00123098 case 6: invoke a program on a grid/instance target.

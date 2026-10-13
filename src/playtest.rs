@@ -13,12 +13,24 @@ use std::collections::HashMap;
 const CELL: f32 = 500.0;
 const DT: f32 = physics::BASE_STEP_SECONDS;
 
+fn debris_resistance(velocity: Vec3, normal: Vec3, mass: f32) -> Vec3 {
+    // Host impact transfer. Some movable props retain a static/sentinel mass.
+    let mass = if mass.is_finite() && mass > 0. && mass < 10000. {
+        mass
+    } else {
+        25.
+    };
+    let retained = (80. / (80. + mass)).clamp(0.55, 0.9);
+    velocity - normal * velocity.dot(normal).min(0.) * (1. - retained)
+}
+
 struct Triangle {
     a: Vec3,
     b: Vec3,
     c: Vec3,
     normal: Vec3,
     surface: u32,
+    curved: bool,
 }
 pub struct TerrainContact {
     pub rails: Vec<crate::rails::Rail>,
@@ -41,6 +53,118 @@ impl Contact {
     }
 }
 impl TerrainContact {
+    /// Full 3D snow support. Orient each face toward the preceding contact so
+    /// a continuous bank can pass through vertical without reversing its normal.
+    pub fn surface_contact(
+        &self,
+        point: Vec3,
+        previous_normal: Vec3,
+        reach: f32,
+    ) -> Option<(Vec3, Vec3, u32)> {
+        let mut best = None;
+        let mut nearest = reach * reach;
+        let low = point - Vec3::splat(reach);
+        let high = point + Vec3::splat(reach);
+        for y in (low.y / CELL).floor() as i32..=(high.y / CELL).floor() as i32 {
+            for x in (low.x / CELL).floor() as i32..=(high.x / CELL).floor() as i32 {
+                for &i in self.grid.get(&(x, y)).into_iter().flatten() {
+                    let t = &self.triangles[i];
+                    // Types 6, 9 and 10 enter the original crash handler.
+                    if t.surface >= 9 || t.surface == 6 {
+                        continue;
+                    }
+                    let mut normal = t.normal;
+                    if normal.dot(previous_normal) < 0. {
+                        normal = -normal;
+                    }
+                    if normal.dot(previous_normal) < 0.7 {
+                        continue;
+                    }
+                    let distance = (point - t.a).dot(normal);
+                    let projected = point - normal * distance;
+                    let a = t.b - t.a;
+                    let b = t.c - t.a;
+                    let c = projected - t.a;
+                    let det = a.length_squared() * b.length_squared() - a.dot(b).powi(2);
+                    if det <= 0.001 {
+                        continue;
+                    }
+                    let u = (c.dot(a) * b.length_squared() - c.dot(b) * a.dot(b)) / det;
+                    let v = (c.dot(b) * a.length_squared() - c.dot(a) * a.dot(b)) / det;
+                    let contact = if u >= 0. && v >= 0. && u + v <= 1. {
+                        projected
+                    } else {
+                        [(t.a, t.b), (t.b, t.c), (t.c, t.a)]
+                            .map(|(a, b)| {
+                                let ab = b - a;
+                                a + ab
+                                    * ((point - a).dot(ab) / ab.length_squared().max(0.001))
+                                        .clamp(0., 1.)
+                            })
+                            .into_iter()
+                            .min_by(|a, b| {
+                                a.distance_squared(point)
+                                    .total_cmp(&b.distance_squared(point))
+                            })
+                            .unwrap()
+                    };
+                    let d = contact.distance_squared(point);
+                    if d < nearest {
+                        nearest = d;
+                        best = Some((contact, normal, t.surface));
+                    }
+                }
+            }
+        }
+        best
+    }
+    /// Local-normal ray used by 0x001125e8. The original spans -100 to +200
+    /// units. Use this only on curved banks or while continuing inverted contact.
+    /// Triangle intersection replaces the original bicubic collision routine.
+    fn oriented_contact(&self, point: Vec3, previous_normal: Vec3) -> Option<(Vec3, Vec3, u32)> {
+        let mut best = None;
+        let mut nearest = f32::INFINITY;
+        for y in ((point.y - 200.) / CELL).floor() as i32..=((point.y + 200.) / CELL).floor() as i32
+        {
+            for x in
+                ((point.x - 200.) / CELL).floor() as i32..=((point.x + 200.) / CELL).floor() as i32
+            {
+                for &i in self.grid.get(&(x, y)).into_iter().flatten() {
+                    let t = &self.triangles[i];
+                    if t.surface >= 9 || t.surface == 6 || (!t.curved && previous_normal.z >= 0.) {
+                        continue;
+                    }
+                    let mut n = t.normal;
+                    if n.dot(previous_normal) < 0. {
+                        n = -n;
+                    }
+                    let alignment = n.dot(previous_normal);
+                    if alignment < 0.7 {
+                        continue;
+                    }
+                    let distance = (point - t.a).dot(n) / alignment;
+                    if !(-200. ..=100.).contains(&distance) || distance.abs() >= nearest {
+                        continue;
+                    }
+                    let p = point - previous_normal * distance;
+                    let a = t.b - t.a;
+                    let b = t.c - t.a;
+                    let c = p - t.a;
+                    let det = a.length_squared() * b.length_squared() - a.dot(b).powi(2);
+                    if det < 0.001 {
+                        continue;
+                    }
+                    let u = (c.dot(a) * b.length_squared() - c.dot(b) * a.dot(b)) / det;
+                    let v = (c.dot(b) * a.length_squared() - c.dot(a) * a.dot(b)) / det;
+                    if u >= -0.0001 && v >= -0.0001 && u + v <= 1.0001 {
+                        nearest = distance.abs();
+                        best = Some((p, n, t.surface));
+                    }
+                }
+            }
+        }
+        best
+    }
     /// A lower layer must not hide snow that already touches the board.
     fn closest_snow(&self, point: Vec3, support: Option<Contact>) -> Option<Contact> {
         self.nearby_snow(point)
@@ -148,7 +272,7 @@ impl TerrainContact {
                         .programs
                         .get(p)?
                         .iter()
-                        .any(|e| matches!(e.kind, 12 | 13 | 16 | 17))
+                        .any(|e| matches!(e.kind, 6 | 12 | 13 | 16 | 17))
                         .then_some(i)
                 })
                 .collect(),
@@ -168,6 +292,19 @@ impl TerrainContact {
                     })
                 })
                 .collect();
+            let normals: Vec<_> = (0..N)
+                .flat_map(|j| (0..N).map(move |i| (i, j)))
+                .map(|(i, j)| {
+                    let a = points[j * (N + 1) + i];
+                    (points[j * (N + 1) + i + 1] - a)
+                        .cross(points[(j + 1) * (N + 1) + i] - a)
+                        .normalize_or_zero()
+                })
+                .filter(|n| n.length_squared() > 0.5)
+                .collect();
+            let curved = normals
+                .iter()
+                .any(|a| normals.iter().any(|b| a.dot(*b).abs() < 0.94));
             for j in 0..N {
                 for i in 0..N {
                     let a = points[j * (N + 1) + i];
@@ -180,12 +317,22 @@ impl TerrainContact {
                         if normal.z < 0.0 {
                             normal = -normal;
                         }
-                        // Snow/ice banks remain rideable. Only near-vertical
-                        // snow or steep hard surfaces enter the body solver.
-                        if normal.z < 0.05 || (normal.z < 0.45 && patch.surface_type >= 9) {
-                            result.objects.add([a, b, c], None);
+                        // Flat walls remain solid. Curved riding patches use the board's
+                        // local-normal contact ray through their vertical sections.
+                        // Board contact handles the upper side of hard slopes.
+                        // Their underside must also block the body inside caves.
+                        if patch.surface_type != 17
+                            && ((normal.z < 0.05 && !curved)
+                                || patch.surface_type >= 9
+                                || patch.surface_type == 6)
+                        {
+                            if normal.z >= 0.45 {
+                                result.objects.add_underside([a, b, c]);
+                            } else {
+                                result.objects.add([a, b, c], None);
+                            }
                         }
-                        if normal.z < 0.05 {
+                        if normal.length_squared() < 0.5 {
                             continue;
                         }
                         let low = a.min(b).min(c);
@@ -203,6 +350,7 @@ impl TerrainContact {
                             c,
                             normal,
                             surface: patch.surface_type,
+                            curved,
                         });
                     }
                 }
@@ -220,6 +368,9 @@ impl TerrainContact {
         let mut best: Option<Contact> = None;
         for &i in self.grid.get(&cell)? {
             let t = &self.triangles[i];
+            if t.normal.z < 0.05 {
+                continue;
+            }
             let v0 = (t.b - t.a).truncate();
             let v1 = (t.c - t.a).truncate();
             let v2 = (point - t.a).truncate();
@@ -557,6 +708,27 @@ impl Session {
             self.riding_switch = !self.riding_switch;
         }
     }
+    /// Host counterpart of the missing backward-slide state transition.
+    /// Keep momentum and physical stance; restore a travel-facing control basis.
+    fn correct_reverse_slide(&mut self) {
+        if !self.grounded || self.legacy_ai_steering || self.normal.z <= 0.05 {
+            return;
+        }
+        let travel = self.velocity - self.normal * self.velocity.dot(self.normal);
+        let forward =
+            (self.forward - self.normal * self.forward.dot(self.normal)).normalize_or_zero();
+        if travel.length() < 250. || forward.dot(travel.normalize_or_zero()) >= -0.25 {
+            return;
+        }
+        if let Some(orientation) = &mut self.orientation {
+            orientation.rotate(std::f32::consts::PI, self.normal.to_array());
+            self.forward = Vec3::from_array(orientation.forward());
+        } else {
+            self.forward = -forward;
+        }
+        self.yaw = self.forward.y.atan2(self.forward.x);
+        self.riding_switch = !self.riding_switch;
+    }
     /// Prepare input and jump charge while the start gate holds position and time.
     pub fn prime_start(&mut self, controls: Controls) {
         if self.phase != Phase::Ready {
@@ -597,7 +769,11 @@ impl Session {
     }
     pub fn release_start(&mut self) {
         if self.phase == Phase::Ready {
-            self.velocity += self.forward * self.start_rock.launch_speed();
+            let bonus = self.start_rock.launch_speed();
+            self.velocity += self.forward * bonus;
+            if bonus > 30. {
+                self.power.start_boost = 0.65;
+            }
             self.phase = Phase::Running;
         }
     }
@@ -694,6 +870,10 @@ impl Session {
                 self.airborne_grace = 0.12;
             } else {
                 let previous = self.position;
+                // Original tangent drive, 0x00140b10. Charge selects the effort band.
+                let effort = physics::boost_effort(self.power.active, charge_before_step);
+                grind.speed +=
+                    grind.speed.signum() * effort * physics::RAIL_BOOST_ACCELERATION * DT;
                 let attached = grind.step(&terrain.rails, DT, controls.brake);
                 self.position = grind.point(&terrain.rails) + Vec3::Z * 2.;
                 self.velocity = grind.tangent(&terrain.rails) * grind.speed;
@@ -724,13 +904,35 @@ impl Session {
             self.yaw -= controls.steer.clamp(-1.0, 1.0) * 2.0 * DT;
         }
         let heading = Vec3::new(self.yaw.cos(), self.yaw.sin(), 0.0);
+        let oriented = if self.grounded && !self.legacy_ai_steering && self.normal.z < 0.7 {
+            terrain.oriented_contact(self.position, self.normal)
+        } else {
+            None
+        };
         if self.grounded {
-            if let Some(hit) = terrain
-                .board_support(
-                    self.position,
-                    &self.objects,
-                    self.surface,
-                )
+            if let Some((_, normal, surface)) = oriented {
+                self.normal = normal;
+                self.surface = surface;
+                let orientation = self.orientation.get_or_insert_with(|| {
+                    let right = self.forward.cross(normal).normalize_or_zero();
+                    let forward = normal.cross(right).normalize_or_zero();
+                    let q = bevy::math::Quat::from_mat3(&bevy::math::Mat3::from_cols(
+                        right, forward, normal,
+                    ));
+                    physics::GroundOrientation([q.w, q.x, q.y, q.z])
+                });
+                self.forward = Vec3::from_array(orientation.forward());
+                physics::contact_depths(
+                    &mut self.shallow_depth,
+                    &mut self.deep_depth,
+                    &self.surfaces[surface.min(17) as usize],
+                );
+            } else if self.normal.z < 0. {
+                // A lost ceiling contact must enter free flight. A downward
+                // floor query cannot replace support above an inverted board.
+                self.grounded = false;
+            } else if let Some(hit) =
+                terrain.board_support(self.position, &self.objects, self.surface)
             {
                 self.normal = hit.normal;
                 self.surface = hit.surface;
@@ -752,27 +954,26 @@ impl Session {
                 self.grounded = false;
             }
         }
-        if !self.legacy_ai_steering {
-            self.ground_inputs.tick(
-                -controls.steer,
-                if controls.crouch || controls.push {
-                    1.
-                } else {
-                    controls.crouch_axis
-                },
-                if controls.brake_axis != 0. {
-                    controls.brake_axis
-                } else if controls.brake {
-                    1.
-                } else {
-                    0.
-                },
-                self.velocity.length(),
-                self.board_style,
-                self.surface,
-                self.input_a8 > 0.,
-            );
-        }
+        self.correct_reverse_slide();
+        self.ground_inputs.tick(
+            -controls.steer,
+            if controls.crouch || controls.push {
+                1.
+            } else {
+                controls.crouch_axis
+            },
+            if controls.brake_axis != 0. {
+                controls.brake_axis
+            } else if controls.brake {
+                1.
+            } else {
+                0.
+            },
+            self.velocity.length(),
+            self.board_style,
+            self.surface,
+            self.input_a8 > 0.,
+        );
         if self.grounded && controls.crouch {
             self.jump_charge = (self.jump_charge + DT * 2.0).min(1.0);
         }
@@ -798,13 +999,12 @@ impl Session {
             let ground_forward =
                 (self.forward - self.normal * self.forward.dot(self.normal)).normalize_or_zero();
             let lateral = self.normal.cross(ground_forward).normalize_or_zero();
-            let hit = terrain
-                .board_support(
-                    self.position,
-                    &self.objects,
-                    self.surface,
-                )
-                .unwrap();
+            let hit = terrain.board_support(self.position, &self.objects, self.surface);
+            let contact_height = oriented.map_or_else(
+                || (self.position.z - hit.unwrap().height - 2.) * self.normal.z,
+                |(p, n, _)| (self.position - p).dot(n) - 2.,
+            );
+
             let state = ForceState {
                 velocity: self.velocity.extend(0.0).to_array(),
                 board_axis: self.forward.extend(0.0).to_array(),
@@ -845,9 +1045,9 @@ impl Session {
                 ground_forward_z: ground_forward.z,
                 surface_kind: self.surface,
                 height: if self.legacy_ai_steering {
-                    (self.position.z - hit.height) * self.normal.z - 5.
+                    (self.position.z - hit.unwrap().height) * self.normal.z - 5.
                 } else {
-                    (self.position.z - hit.height - 2.) * self.normal.z
+                    contact_height
                 },
                 shallow_depth: if self.legacy_ai_steering {
                     5.
@@ -868,7 +1068,7 @@ impl Session {
                 1
             }];
             let gravity = surface.coefficient(0);
-            let normal = physics::normal_force(
+            let mut normal = physics::normal_force(
                 state.height,
                 self.velocity.dot(self.normal),
                 &state,
@@ -879,7 +1079,18 @@ impl Session {
                 normal / gravity.max(1.0),
                 &state,
                 surface,
-            ) + physics::drive_force(&state, surface);
+            ) + physics::drive_force(&state, surface)
+                + if self.power.active && !self.legacy_ai_steering && self.power.super_boost <= 0. {
+                    // Host boost-strength adjustment. Keep native force arithmetic
+                    // and its braking/heading gates intact. Scale only boost drive.
+                    let mut unboosted = state;
+                    unboosted.input_a8 = 0.;
+                    3. * (physics::drive_force(&state, surface)
+                        - physics::drive_force(&unboosted, surface))
+                    .max(0.)
+                } else {
+                    0.
+                };
             let sideways = physics::lateral_force(
                 self.velocity.dot(lateral),
                 self.velocity.dot(ground_forward),
@@ -887,6 +1098,11 @@ impl Session {
                 &state,
                 surface,
             );
+            // 0x0013fcb0 clamps after evaluating longitudinal/lateral forces.
+            // Inverted contact cannot pull the rider toward the ceiling.
+            if self.normal.z < 0. {
+                normal = normal.max(0.);
+            }
             // Controls use positive-right. The original bank uses positive-left.
             let (bank_normal, carve) = if self.legacy_ai_steering {
                 (normal, 0.)
@@ -948,7 +1164,12 @@ impl Session {
             self.forward = heading;
         }
         // Sweep the rider body through the entire step. Radius and height remain host parameters.
-        let offset = Vec3::Z * 65.0;
+        let body_up = if oriented.is_some() {
+            self.normal
+        } else {
+            Vec3::Z
+        };
+        let offset = body_up * 65.0;
         let mut center = previous + offset;
         let mut remaining = self.position - previous;
         let mut ignored = std::collections::HashSet::new();
@@ -961,7 +1182,7 @@ impl Session {
                 .into_iter()
                 .filter_map(|h| {
                     terrain.objects.penetration_contact(
-                        center + Vec3::Z * (h - 65.),
+                        center + body_up * (h - 65.),
                         28.,
                         &self.objects.disabled,
                     )
@@ -971,7 +1192,8 @@ impl Session {
                 break;
             };
             if let Some(object) = object {
-                if touched.insert(object) {
+                let first_contact = touched.insert(object);
+                if first_contact {
                     let normal = correction.normalize_or_zero();
                     self.objects.contact_with_velocity(
                         object,
@@ -981,6 +1203,13 @@ impl Session {
                     );
                 }
                 if self.objects.disabled.contains(&object) {
+                    if first_contact {
+                        self.velocity = debris_resistance(
+                            self.velocity,
+                            correction.normalize_or_zero(),
+                            terrain.objects.properties[object].mass,
+                        );
+                    }
                     continue;
                 }
             }
@@ -992,7 +1221,7 @@ impl Session {
                 .into_iter()
                 .filter_map(|height| {
                     terrain.objects.sweep(
-                        center + Vec3::Z * (height - 65.0),
+                        center + body_up * (height - 65.0),
                         remaining,
                         28.0,
                         &self.objects.disabled,
@@ -1006,7 +1235,8 @@ impl Session {
             };
             collided = true;
             if let Some(object) = hit.object {
-                if touched.insert(object) {
+                let first_contact = touched.insert(object);
+                if first_contact {
                     self.objects.contact_with_velocity(
                         object,
                         &terrain.objects.properties,
@@ -1017,12 +1247,12 @@ impl Session {
                 if self.objects.disabled.contains(&object)
                     || !terrain.objects.properties[object].response_enabled()
                 {
-                    if self.objects.disabled.contains(&object) {
-                        // Finite-mass debris removes some momentum on the first hit.
-                        let mass = terrain.objects.properties[object].mass;
-                        if mass > 0. && mass < 10000. {
-                            self.velocity *= (80. / (80. + mass)).clamp(0.45, 1.);
-                        }
+                    if first_contact && self.objects.disabled.contains(&object) {
+                        self.velocity = debris_resistance(
+                            self.velocity,
+                            hit.normal,
+                            terrain.objects.properties[object].mass,
+                        );
                     }
                     ignored.insert(object);
                     continue;
@@ -1040,7 +1270,7 @@ impl Session {
             self.position = center - offset;
         }
         self.airborne_grace = (self.airborne_grace - DT).max(0.0);
-        if !was_grounded
+        let swept_contact = if !was_grounded
             && !self.power.lift_active()
             && let Some((position, hit)) = terrain.swept_board(previous, self.position)
             && self.velocity.dot(hit.normal) <= 0.
@@ -1049,10 +1279,13 @@ impl Session {
             self.airborne_grace = 0.;
             // The ordinary landing branch below applies the impact response once.
             self.normal = hit.normal;
-        }
+            Some(hit)
+        } else {
+            None
+        };
         let high = previous.z.max(self.position.z) + if self.grounded { 60.0 } else { 2.0 };
         let query = Vec3::new(self.position.x, self.position.y, high);
-        let mut support = terrain.below(query, self.position.z - 200.0);
+        let mut support = swept_contact.or_else(|| terrain.below(query, self.position.z - 200.0));
         if let Some((height, normal)) =
             terrain
                 .objects
@@ -1070,12 +1303,38 @@ impl Session {
             // A compressed airborne board is still a landing. Search along the
             // receiving normal when the vertical query starts below the bank.
             if let Some(hit) = terrain.closest_snow(self.position, support)
-                && (was_grounded || (self.airborne_grace == 0. && self.velocity.dot(hit.normal) <= 0.))
+                && (was_grounded
+                    || (self.airborne_grace == 0. && self.velocity.dot(hit.normal) <= 0.))
             {
                 support = Some(hit);
             }
         }
-        if let Some(hit) = support {
+        let next_oriented = if self.grounded && oriented.is_some() {
+            terrain.oriented_contact(self.position, self.normal)
+        } else {
+            None
+        };
+        if let Some((point, normal, surface)) = next_oriented {
+            self.normal = normal;
+            self.surface = surface;
+            self.velocity = Vec3::from_array(physics::ground_velocity(
+                self.velocity.to_array(),
+                normal.to_array(),
+                surface,
+            ));
+            self.grounded = (self.position - point).dot(normal) - 2.
+                <= self.surfaces[surface.min(17) as usize].coefficient(5);
+            if self.grounded {
+                self.orientation
+                    .as_mut()
+                    .unwrap()
+                    .align_contact(normal.to_array(), surface);
+                self.forward = Vec3::from_array(self.orientation.unwrap().forward());
+                self.yaw = self.forward.y.atan2(self.forward.x);
+            }
+        } else if oriented.is_some() && self.grounded {
+            self.grounded = false;
+        } else if let Some(hit) = support {
             if self.grounded && !self.legacy_ai_steering {
                 self.normal = hit.normal;
                 self.surface = hit.surface;
@@ -1096,7 +1355,10 @@ impl Session {
                 }
             } else if !self.power.lift_active()
                 && (self.airborne_grace == 0.0 || previous.z >= hit.height + 1.)
-                && self.position.z <= hit.height + 2.0
+                // Sweeps stop exactly at contact. Re-evaluating the plane can
+                // leave a positive rounding residual, especially on steep banks.
+                // Rejecting that contact pins the board there on every tick.
+                && hit.board_distance(self.position) <= 0.05
                 && self.velocity.dot(hit.normal) <= 0.0
             {
                 let landing_quality = crate::landing::contact(self.velocity, hit.normal);
@@ -1173,6 +1435,18 @@ impl Session {
         }
     }
     fn touch_scripts(&mut self, previous: Vec3, terrain: &TerrainContact) {
+        for object in
+            terrain
+                .objects
+                .reset_contacts(previous, self.position, 6., &self.objects.disabled)
+        {
+            self.objects.contact_with_velocity(
+                object,
+                &terrain.objects.properties,
+                &terrain.objects.scripts,
+                self.velocity.to_array(),
+            );
+        }
         for &object in &terrain.script_triggers {
             let p = &terrain.objects.properties[object];
             let reset_zone = terrain
@@ -1723,5 +1997,206 @@ mod collision_regression {
         session.reset();
         assert!(session.objects.disabled.is_empty());
         assert!(session.objects.events.is_empty());
+    }
+}
+
+#[cfg(test)]
+mod slope_landing_regression {
+    use super::*;
+    #[test]
+    #[ignore = "requires the original disc"]
+    fn oblique_slope_touchdown_exits_air_without_course_return() {
+        for degrees in [20f32, 45., 65., 80.] {
+            let (base, terrain) = slope_surface(degrees.to_radians(), 1);
+            for heading in (0..360).step_by(15) {
+                for speed in [0., 600., 1800.] {
+                    let angle = (heading as f32).to_radians();
+                    let mut network = base.network.clone();
+                    network.race.clear();
+                    network.ai[network.starts[0]].segments[0].direction =
+                        [angle.cos(), angle.sin(), 0.];
+                    let mut rider = Session::new(network, &terrain).unwrap();
+                    rider.phase = Phase::Running;
+                    rider.position = Vec3::Z * 2. + rider.normal * 0.01;
+                    rider.forward = Vec3::new(angle.cos(), angle.sin(), 0.);
+                    let tangent = (rider.forward - rider.normal * rider.forward.dot(rider.normal))
+                        .normalize_or_zero();
+                    rider.velocity = tangent * speed - rider.normal * 120.;
+                    rider.grounded = false;
+                    rider.recovery = None;
+                    let mut contact = false;
+                    for _ in 0..90 {
+                        rider.tick(Controls::default(), &terrain);
+                        contact |= rider.landed_this_tick;
+                        assert!(
+                            rider.returning.is_none(),
+                            "{degrees}/{heading}/{speed}: reset masked failed contact"
+                        );
+                    }
+                    assert!(
+                        contact,
+                        "{degrees}/{heading}/{speed}: no touchdown, position {:?}, velocity {:?}, normal {:?}, grounded {}",
+                        rider.position, rider.velocity, rider.normal, rider.grounded
+                    );
+                    assert!(
+                        rider.grounded,
+                        "{degrees}/{heading}/{speed}: still airborne at {:?}, velocity {:?}",
+                        rider.position, rider.velocity
+                    );
+                }
+            }
+        }
+    }
+    fn slope_surface(angle: f32, surface: u32) -> (Session, TerrainContact) {
+        let path = std::path::Path::new("extracted/DATA/MODELS/SNOW.BIG");
+        let (mut level, _) = crate::load_track(path).unwrap();
+        let mut patch = level.patches[0].clone();
+        patch.coefficients = [[0.; 3]; 16];
+        patch.coefficients[0] = [-10000., -10000., 10000. * angle.tan()];
+        patch.coefficients[1] = [20000., 0., -20000. * angle.tan()];
+        patch.coefficients[4] = [0., 20000., 0.];
+        patch.surface_type = surface;
+        level.patches = vec![patch];
+        level.instances.clear();
+        level.rails.clear();
+        let terrain = TerrainContact::from_level(&level);
+        let mut network = crate::load_track_paths(path).unwrap();
+        network.ai[network.starts[0]].origin = [0., 0., 0.];
+        network.ai[network.starts[0]].segments[0].direction = [1., 0., 0.];
+        let mut session = Session::new(network, &terrain).unwrap();
+        session.phase = Phase::Running;
+        (session, terrain)
+    }
+}
+
+#[cfg(test)]
+mod authored_loop_regression {
+    use super::*;
+
+    fn elysium_rider(index: usize, speed: f32) -> (Session, TerrainContact) {
+        let path = std::path::Path::new("extracted/DATA/MODELS/ELYSIUM.BIG");
+        let (level, _) = crate::load_track(path).unwrap();
+        let terrain = TerrainContact::from_level(&level);
+        // Original rideable ice ribbon. Keep adjacent geometry, objects and scripts.
+        let patch = &level.patches[index];
+        assert_eq!(patch.surface_type, 5);
+        let center = Vec3::from_array(patch.position(0.5, 0.5));
+        let du = Vec3::from_array(patch.position(0.51, 0.5)) - center;
+        let dv = Vec3::from_array(patch.position(0.5, 0.51)) - center;
+        let normal = -du.cross(dv).normalize();
+        let forward = du.normalize();
+        let mut network = crate::load_track_paths(path).unwrap();
+        network.race.clear();
+        network.ai[network.starts[0]].segments[0].direction = forward.to_array();
+        let mut rider = Session::new(network, &terrain).unwrap();
+        let (point, normal, _) = terrain.surface_contact(center, normal, 150.).unwrap();
+        rider.position = point + normal * 2.;
+        rider.normal = normal;
+        rider.forward = forward;
+        rider.velocity = forward * speed;
+        let f = (forward - normal * forward.dot(normal)).normalize();
+        let q =
+            bevy::math::Quat::from_mat3(&bevy::math::Mat3::from_cols(f.cross(normal), f, normal));
+        rider.orientation = Some(physics::GroundOrientation([q.w, q.x, q.y, q.z]));
+        rider.grounded = true;
+        rider.phase = Phase::Running;
+        rider.power.charge = 1.;
+        (rider, terrain)
+    }
+
+    #[test]
+    #[ignore = "requires the original disc"]
+    fn elysium_authored_loop_supports_momentum_and_boost() {
+        for (speed, boost) in [(4500., false), (2500., true)] {
+            let (mut rider, terrain) = elysium_rider(4446, speed);
+            let mut inverted = false;
+            let mut completed = false;
+            for frame in 0..200 {
+                rider.tick(
+                    Controls {
+                        boost,
+                        ..Default::default()
+                    },
+                    &terrain,
+                );
+                assert!(rider.returning.is_none(), "Reset masked lost loop contact");
+                assert!(
+                    rider.grounded,
+                    "Lost loop at {frame}, boost={boost}: {:?}",
+                    rider.position
+                );
+                inverted |= rider.normal.z < -0.7;
+                if inverted && rider.normal.z > 0.8 {
+                    completed = true;
+                    break;
+                }
+            }
+            assert!(completed, "Did not complete the loop, boost={boost}");
+        }
+    }
+
+    #[test]
+    #[ignore = "requires the original disc"]
+    fn stationary_rider_falls_away_from_inverted_ice() {
+        let (mut rider, terrain) = elysium_rider(4445, 0.);
+        assert!(rider.normal.z < -0.7);
+        let start = rider.position;
+        for _ in 0..60 {
+            rider.tick(Controls::default(), &terrain);
+            assert!(rider.returning.is_none());
+            if !rider.grounded {
+                assert!(rider.position.z < start.z);
+                assert!(rider.velocity.z < 0.);
+                return;
+            }
+        }
+        panic!("Stationary rider remained attached to the ceiling");
+    }
+
+    #[test]
+    #[ignore = "requires the original disc"]
+    fn flat_vertical_snow_blocks_motion_without_attaching_or_climbing() {
+        let path = std::path::Path::new("extracted/DATA/MODELS/SNOW.BIG");
+        let (mut level, _) = crate::load_track(path).unwrap();
+        let mut wall = level.patches[0].clone();
+        wall.coefficients = [[0.; 3]; 16];
+        wall.coefficients[0] = [-5000., 0., -5000.];
+        wall.coefficients[1] = [10000., 0., 0.];
+        wall.coefficients[4] = [0., 0., 10000.];
+        wall.surface_type = 1;
+        let mut floor = wall.clone();
+        floor.coefficients[0] = [-5000., -5000., -1000.];
+        floor.coefficients[4] = [0., 10000., 0.];
+        level.patches = vec![wall, floor];
+        level.instances.clear();
+        level.rails.clear();
+        let terrain = TerrainContact::from_level(&level);
+        assert!(
+            terrain
+                .oriented_contact(Vec3::new(0., -2., 0.), -Vec3::Y)
+                .is_none()
+        );
+        let mut network = crate::load_track_paths(path).unwrap();
+        network.race.clear();
+        network.ai[network.starts[0]].origin = [0., -100., 500.];
+        let mut rider = Session::new(network, &terrain).unwrap();
+        rider.position = Vec3::new(0., -100., 500.);
+        rider.velocity = Vec3::Y * 6000.;
+        rider.grounded = false;
+        rider.phase = Phase::Running;
+        for _ in 0..30 {
+            rider.tick(
+                Controls {
+                    steer: 1.,
+                    boost: true,
+                    ..Default::default()
+                },
+                &terrain,
+            );
+            assert!(rider.position.y < 0.);
+            assert!(rider.position.z <= 500.);
+            assert!(!rider.grounded, "Flat wall became riding support");
+            assert!(rider.returning.is_none());
+        }
     }
 }

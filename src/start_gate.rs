@@ -25,9 +25,40 @@ impl Rocking {
         240. * peak * (1. - self.velocity.abs() / 6.).clamp(0., 1.)
     }
 }
+
+pub fn opponent_forward(remaining: f32, slot: usize) -> bool {
+    // Host timing for repeated rocking, followed by a timed final push.
+    // Offsets prevent the whole starting field from moving in lockstep.
+    if remaining < 0.8 {
+        remaining < 0.29 + (slot % 4) as f32 * 0.045
+    } else {
+        (remaining + slot as f32 * 0.13).rem_euclid(1.1) < 0.55
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn opponents_rock_both_ways_during_countdown() {
+        for slot in 0..7 {
+            let mut r = Rocking::default();
+            let mut peaks = 0;
+            let mut previous = 0.;
+            for tick in 0..180 {
+                let remaining = (180 - tick) as f32 / 60.;
+                r.tick(if opponent_forward(remaining, slot) {
+                    1.
+                } else {
+                    -1.
+                });
+                if previous <= 0.5 && r.offset > 0.5 {
+                    peaks += 1;
+                }
+                previous = r.offset;
+            }
+            assert!(peaks >= 2, "NPC {slot} only leans once instead of rocking");
+        }
+    }
     #[test]
     fn forward_peak_rewards_timing_and_holding_cannot_bank_a_start() {
         let mut r = Rocking::default();

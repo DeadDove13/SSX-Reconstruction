@@ -13,6 +13,7 @@ pub(super) struct State {
     respawns: u32,
     finishing: bool,
     result_refresh: u32,
+    meter_phase: f32,
 }
 #[derive(Component)]
 pub(super) struct Quad;
@@ -74,6 +75,7 @@ fn setup(mut commands: Commands) {
     for _ in 0..80 {
         commands.spawn((
             Quad,
+            UiTransform::default(),
             ImageNode::default(),
             Node::default(),
             Visibility::Hidden,
@@ -178,6 +180,10 @@ fn tick(
             commands.entity(e).despawn();
         }
     }
+    if menu.screen == Screen::Game && world.session.phase != Phase::Paused {
+        let speed = if world.session.power.active { 9. } else { 2.2 };
+        state.meter_phase = (state.meter_phase + speed / 60.).rem_euclid(std::f32::consts::TAU);
+    }
     let Some(media) = media else {
         return;
     };
@@ -233,6 +239,8 @@ struct Draw {
     y: f32,
     scale: f32,
     alpha: f32,
+    stretch: Vec2,
+    angle: f32,
 }
 fn number(
     out: &mut Vec<Draw>,
@@ -258,6 +266,8 @@ fn number(
             y,
             scale,
             alpha,
+            stretch: Vec2::ONE,
+            angle: 0.,
         });
         x += sprites::SPRITES[id].1[0] * scale;
     }
@@ -270,6 +280,8 @@ fn sprite(out: &mut Vec<Draw>, id: usize, cx: f32, y: f32, scale: f32, alpha: f3
         y,
         scale,
         alpha,
+        stretch: Vec2::ONE,
+        angle: 0.,
     });
 }
 pub fn render(
@@ -279,7 +291,7 @@ pub fn render(
     art: Res<Art>,
     window: Single<&Window>,
     ui_scale: Res<UiScale>,
-    mut quads: Query<(&mut ImageNode, &mut Node, &mut Visibility), With<Quad>>,
+    mut quads: Query<(&mut ImageNode, &mut Node, &mut UiTransform, &mut Visibility), With<Quad>>,
     mut caption: Query<
         (&mut lettering::Label, &mut Visibility),
         (With<Caption>, Without<Quad>, Without<RankCount>),
@@ -314,6 +326,12 @@ pub fn render(
                     0.62
                 },
             );
+            // Host animation of the original ring artwork. Staggered phases
+            // show rotation without moving the meter's charge thresholds.
+            let phase = state.meter_phase - i as f32 * 0.38;
+            let ring = draw.last_mut().unwrap();
+            ring.stretch = Vec2::new(1. + phase.sin() * 0.08, 0.2 + phase.cos().abs() * 0.8);
+            ring.angle = phase.sin() * 0.09;
         }
         let cap = if world.session.power.charge < 0.333 {
             0x39
@@ -329,6 +347,7 @@ pub fn render(
         };
         sprite(&mut draw, 0x36, 1220., 131., 1.4 * bounce, 1.);
         sprite(&mut draw, cap, 1220., 137., 1.4 * bounce, 1.);
+        draw.last_mut().unwrap().angle = state.meter_phase;
         for (id, y) in [
             (0x32, 209.),
             (0x33, 293.),
@@ -454,7 +473,7 @@ pub fn render(
         node.left = px(98. * scale);
         node.top = px(oy + 52. * scale);
     }
-    for (index, (mut image, mut node, mut visible)) in quads.iter_mut().enumerate() {
+    for (index, (mut image, mut node, mut transform, mut visible)) in quads.iter_mut().enumerate() {
         let Some(d) = draw.get(index) else {
             *visible = Visibility::Hidden;
             continue;
@@ -490,6 +509,8 @@ pub fn render(
             height: px(size[1] * d.scale * scale),
             ..default()
         };
+        transform.scale = d.stretch;
+        transform.rotation = Rot2::radians(d.angle);
         *visible = Visibility::Inherited;
     }
     for (mut label, mut visibility) in &mut caption {
@@ -951,6 +972,8 @@ fn status_overlay(
         String::new()
     } else if world.session.returning.is_some() {
         "RETURNING TO COURSE".into()
+    } else if p.message_time > 0. {
+        p.message.clone()
     } else {
         let mut parts = Vec::new();
         if p.multiplier > 1. {

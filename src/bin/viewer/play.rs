@@ -72,6 +72,7 @@ pub(super) struct TrackObject {
     pub initially_visible: bool,
     pub part: usize,
     pub pivot: Vec3,
+    pub bounds: [Vec3; 2],
 }
 #[derive(Component)]
 pub(super) struct PlayerCamera;
@@ -461,7 +462,7 @@ mod camera_tests {
     #[ignore = "requires original Snowdream assets"]
     fn right_stick_and_mouse_do_not_move_the_chase_camera() {
         let archive = Path::new("extracted/DATA/MODELS/SNOW.BIG");
-        let (level, _) = ssx_rust::load_track(archive).unwrap();
+        let (level, textures) = ssx_rust::load_track(archive).unwrap();
         let mut world = load(archive, &level, false, false).unwrap();
         world.session.phase = Phase::Running;
         let mut menu = interface::Menu::default();
@@ -470,6 +471,12 @@ mod camera_tests {
         frame.advance_by(std::time::Duration::from_secs_f32(1. / 60.));
         let mut app = App::new();
         app.insert_resource(world)
+            .insert_resource(super::super::Track {
+                level,
+                textures,
+                name: "SNOW".into(),
+                focus_patch: None,
+            })
             .insert_resource(menu)
             .insert_resource(frame)
             .init_resource::<Time<Fixed>>()
@@ -551,10 +558,18 @@ pub(super) fn load(
         .join("CAMERA/COMMONOB.CM2");
     let data =
         std::fs::read(&camera_path).map_err(|e| format!("{}: {e}", camera_path.display()))?;
-    let mut cameras = Vec::new();
-    for name in ["chase near", "chase far", "chase over"] {
-        cameras.push(player_camera::decode_chase(&data, name)?);
-    }
+    // Host framing preferences. Retain the original far/overhead preset.
+    let mut medium = player_camera::decode_chase(&data, "chase far")?;
+    let mut close = medium.clone();
+    close.name = "chase near".into();
+    close.pitch_offset -= 3f32.to_radians();
+    medium.pole_length = 450.;
+    medium.pitch_offset -= 3f32.to_radians();
+    let cameras = vec![
+        close,
+        medium,
+        player_camera::decode_chase(&data, "chase over")?,
+    ];
     let terrain = TerrainContact::from_level(level);
     let network = ssx_rust::load_track_paths(archive)?;
     let opponents = ssx_rust::opponents::Opponent::field(&network, &terrain)?;
@@ -686,6 +701,7 @@ pub(super) fn plugin(app: &mut App) {
                 render,
                 render_objects,
                 presentation::render.after(render),
+                presentation::start_lights,
                 audio::lifecycle,
                 (rider::appearance, rider::animate, rider::preview::animate).chain(),
                 media::menu_music,
@@ -766,7 +782,15 @@ fn input(
     pads: Query<&Gamepad>,
 ) {
     use ssx_rust::controls::{Pad, token};
-    if std::env::args().any(|a| a == "--race-feedback-smoke-test") {
+    if std::env::args().any(|a| {
+        matches!(
+            a.as_str(),
+            "--race-feedback-smoke-test"
+                | "--world-animation-smoke-test"
+                | "--start-animation-smoke-test"
+                | "--pickup-feedback-smoke-test"
+        )
+    }) {
         return;
     }
     if menu.open() || menu.block_input {
@@ -916,7 +940,8 @@ fn input(
     } else {
         keys.pressed(KeyCode::KeyD) as u8 as f32 - keys.pressed(KeyCode::KeyA) as u8 as f32
     };
-    world.controls.boost = boost || keys.pressed(KeyCode::ShiftLeft);
+    world.controls.boost =
+        boost || keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
     world.controls.brake = brake != 0. || keys.pressed(KeyCode::KeyS);
     world.controls.brake_axis = if keys.pressed(KeyCode::KeyS) {
         1.
@@ -936,7 +961,8 @@ fn input(
 
 fn simulate(
     mut world: ResMut<PlayWorld>,
-    menu: Res<interface::Menu>,
+    track: Res<super::Track>,
+    mut menu: ResMut<interface::Menu>,
     mut exit: MessageWriter<AppExit>,
     mut commands: Commands,
     sounds: Res<audio::GameSounds>,
@@ -953,7 +979,71 @@ fn simulate(
         w.controls.push = true;
     }
     w.ticks += 1;
-    if w.smoke {
+    let world_animation_test = std::env::args().any(|a| a == "--world-animation-smoke-test");
+    let start_animation_test = std::env::args().any(|a| a == "--start-animation-smoke-test");
+    let pickup_test = std::env::args().any(|a| a == "--pickup-feedback-smoke-test");
+    if start_animation_test {
+        w.controls = Controls {
+            push: menu.countdown < 0.4,
+            brake: menu.countdown >= 0.4,
+            boost: menu.countdown == 0.,
+            ..default()
+        };
+        if w.ticks == 310 {
+            w.session.power.charge = 1.;
+            menu.event = ssx_rust::front_end::Event::Showoff;
+        }
+        if [360, 420].contains(&w.ticks) {
+            commands
+                .spawn(bevy::render::view::screenshot::Screenshot::primary_window())
+                .observe(bevy::render::view::screenshot::save_to_disk(format!(
+                    "analysis/start-animation-{}.png",
+                    w.ticks
+                )));
+        }
+    }
+    if pickup_test {
+        w.controls = Controls::default();
+        if w.ticks == 1 {
+            menu.screen = interface::Screen::Game;
+            menu.refresh();
+            menu.event = ssx_rust::front_end::Event::Showoff;
+            w.session.phase = Phase::Running;
+        }
+        if [61, 66, 76, 90, 120, 165].contains(&w.ticks) {
+            commands
+                .spawn(bevy::render::view::screenshot::Screenshot::primary_window())
+                .observe(bevy::render::view::screenshot::save_to_disk(format!(
+                    "analysis/pickup-feedback-{}.png",
+                    w.ticks
+                )));
+        }
+        if w.ticks == 220 {
+            exit.write(AppExit::Success);
+        }
+    }
+    if world_animation_test || start_animation_test {
+        if world_animation_test && w.ticks == 1 {
+            w.session.toggle_run();
+        }
+        if [30, 55, 85, 120, 240, 300].contains(&w.ticks) {
+            let prefix = if world_animation_test {
+                "world-animation"
+            } else {
+                "start-animation"
+            };
+            commands
+                .spawn(bevy::render::view::screenshot::Screenshot::primary_window())
+                .observe(bevy::render::view::screenshot::save_to_disk(format!(
+                    "analysis/{prefix}-{}.png",
+                    w.ticks
+                )));
+        }
+        if w.ticks == if start_animation_test { 450 } else { 330 } {
+            exit.write(AppExit::Success);
+        }
+    }
+    if w.smoke && !world_animation_test && !start_animation_test && !pickup_test {
         let recovery_test = std::env::args().any(|a| a == "--recovery-smoke-test");
         w.smoke_stagger |= w
             .session
@@ -971,7 +1061,8 @@ fn simulate(
                 w.session.velocity -= normal * 1800.;
             }
         }
-        if recovery_test && [380, 405, 435, 480].contains(&w.ticks) {
+        if recovery_test && [30, 55, 75, 110, 150, 200, 240, 380, 405, 435, 480].contains(&w.ticks)
+        {
             commands
                 .spawn(bevy::render::view::screenshot::Screenshot::primary_window())
                 .observe(bevy::render::view::screenshot::save_to_disk(format!(
@@ -1073,8 +1164,26 @@ fn simulate(
         }
     }
     let previous_velocity = w.session.velocity;
-    if w.session.phase == Phase::Running {
+    if matches!(w.session.phase, Phase::Running | Phase::Finished) {
         w.session.objects.advance_effects();
+        w.terrain.objects.animate(&track.level, &w.session.objects);
+        w.terrain
+            .camera_geometry
+            .animate(&track.level, &w.session.objects);
+        if w.session.grounded {
+            w.session.position += w
+                .terrain
+                .objects
+                .support_motion(w.session.position, &w.session.objects.disabled);
+        }
+        for opponent in &mut w.opponents {
+            if opponent.session.grounded {
+                opponent.session.position += w
+                    .terrain
+                    .objects
+                    .support_motion(opponent.session.position, &w.session.objects.disabled);
+            }
+        }
     }
     w.previous_player = w.session.position;
     w.previous_camera = w.current_camera;
@@ -1162,6 +1271,48 @@ fn simulate(
         w.session
             .objects
             .tick_scripts(&w.terrain.objects.properties, &w.terrain.objects.scripts);
+    }
+    if pickup_test && [60, 160].contains(&w.ticks) {
+        let kind = if w.ticks == 60 { 17 } else { 13 };
+        let index = w
+            .terrain
+            .script_triggers
+            .iter()
+            .copied()
+            .find(|&i| {
+                w.terrain
+                    .objects
+                    .scripts
+                    .contact_program(&w.terrain.objects.properties[i])
+                    .is_some_and(|p| {
+                        w.terrain.objects.scripts.programs[p]
+                            .iter()
+                            .any(|e| e.kind == kind)
+                    })
+            })
+            .unwrap();
+        let b = w.terrain.objects.properties[index]
+            .bounds
+            .map(Vec3::from_array);
+        w.session.position = (b[0] + b[1]) * 0.5;
+        w.session.velocity = Vec3::ZERO;
+        w.session.grounded = false;
+        w.session
+            .power
+            .script_effect(kind, if kind == 17 { 10. } else { 5. });
+        w.session.objects.contact(
+            index,
+            &w.terrain.objects.properties,
+            &w.terrain.objects.scripts,
+        );
+        w.snap = true;
+    }
+    if world_animation_test && track.name == "MEGAPLEX" && [60, 180].contains(&w.ticks) {
+        w.session.objects.contact(
+            307,
+            &w.terrain.objects.properties,
+            &w.terrain.objects.scripts,
+        );
     }
     if std::env::args().any(|a| a == "--race-feedback-smoke-test") && w.ticks == 450 {
         let properties = &w.terrain.objects.properties;
@@ -1264,6 +1415,7 @@ fn simulate(
 }
 fn render(
     mut world: ResMut<PlayWorld>,
+    track: Res<super::Track>,
     time: Res<Time<Fixed>>,
     frame: Res<Time>,
     window: Single<&Window, With<bevy::window::PrimaryWindow>>,
@@ -1318,9 +1470,18 @@ fn render(
         )
         .unwrap();
     }
-    if safe.distance_squared(follow) > 1. {
-        // Keep the rider framed after the collision routine slides the camera up a bank.
-        t.look_at(super::world(target.to_array()), Vec3::Y);
+    if w.session.phase != Phase::Finished {
+        // Ease only the terrain framing correction. The normal CM2 rotation
+        // already has angular damping and remains responsive to rider steering.
+        let facing = Transform::from_translation(t.translation)
+            .looking_at(super::world(target.to_array()), Vec3::Y)
+            .rotation;
+        t.rotation = w.clearance.frame_rotation(
+            t.rotation,
+            facing,
+            safe.distance_squared(follow) > 1.,
+            if active { frame.delta_secs() } else { 0. },
+        );
     }
     if world.effects_smoke {
         **t = Transform::from_translation(super::world(
@@ -1331,6 +1492,86 @@ fn render(
             Vec3::Y,
         );
     }
+    if std::env::args().any(|a| a == "--pickup-feedback-smoke-test") {
+        let focus = world.session.position + Vec3::Z * 80.;
+        **t = Transform::from_translation(super::world(
+            (focus - Vec3::Y * 650. + Vec3::Z * 190.).to_array(),
+        ))
+        .looking_at(super::world(focus.to_array()), Vec3::Y);
+    }
+    if std::env::args().any(|a| a == "--start-animation-smoke-test") {
+        let focus = if world.ticks < 300 {
+            track
+                .level
+                .object_names
+                .iter()
+                .position(|n| n.starts_with("startlightshang_"))
+                .map(|i| {
+                    let b = track.level.instances[i]
+                        .properties
+                        .bounds
+                        .map(Vec3::from_array);
+                    (b[0] + b[1]) * 0.5
+                })
+                .unwrap_or(rider + Vec3::Z * 90.)
+        } else {
+            rider + Vec3::Z * 90.
+        };
+        **t = Transform::from_translation(super::world(
+            (focus - world.session.forward * 650. + Vec3::Z * 100.).to_array(),
+        ))
+        .looking_at(super::world(focus.to_array()), Vec3::Y);
+    }
+    if std::env::args().any(|a| a == "--recovery-smoke-test") {
+        // Inspect the full pose from a stable distance. The normal chase-camera
+        // collision test is separate from this animation/recovery smoke test.
+        let focus = rider + Vec3::Z * 90.;
+        let side = world.session.forward.cross(Vec3::Z).normalize_or_zero();
+        **t = Transform::from_translation(super::world(
+            (focus - world.session.forward * 700. + side * 250. + Vec3::Z * 250.).to_array(),
+        ))
+        .looking_at(super::world(focus.to_array()), Vec3::Y);
+    }
+    if std::env::args().any(|a| a == "--world-animation-smoke-test") && track.name == "MERQUERY" {
+        let points: Vec<_> = track
+            .level
+            .object_names
+            .iter()
+            .enumerate()
+            .filter(|(_, n)| {
+                n.starts_with("floodlightBeam")
+                    && (n.ends_with("6002") || n.ends_with("6003") || n.ends_with("6004"))
+            })
+            .map(|(i, _)| Vec3::from_slice(&track.level.instances[i].transform[12..15]))
+            .collect();
+        let focus =
+            points.iter().copied().sum::<Vec3>() / points.len().max(1) as f32 + Vec3::Z * 1800.;
+        **t = Transform::from_translation(super::world(
+            (focus + Vec3::new(-1400., 0., 1600.)).to_array(),
+        ))
+        .looking_at(super::world(focus.to_array()), Vec3::Y);
+    } else if std::env::args().any(|a| a == "--world-animation-smoke-test") {
+        let instance = &track.level.instances[306];
+        let p = Mat4::from_cols_array(&instance.transform);
+        let focus = p.transform_point3(Vec3::new(-450., 0., 0.));
+        let eye = focus + p.transform_vector3(Vec3::new(-1300., 1200., 1800.));
+        **t = Transform::from_translation(super::world(eye.to_array()))
+            .looking_at(super::world(focus.to_array()), Vec3::Y);
+    }
+    if world.smoke {
+        if let Some(points) = std::env::args().find_map(|a| {
+            a.strip_prefix("--test-camera=").map(|v| {
+                v.split(',')
+                    .filter_map(|n| n.parse::<f32>().ok())
+                    .collect::<Vec<_>>()
+            })
+        }) {
+            if points.len() == 6 && points.iter().all(|v| v.is_finite()) {
+                **t = Transform::from_translation(super::world([points[0], points[1], points[2]]))
+                    .looking_at(super::world([points[3], points[4], points[5]]), Vec3::Y);
+            }
+        }
+    }
     if let Projection::Perspective(p) = &mut **projection {
         p.near = 0.08;
         // Provisional projection adapter. Original GS projection remains unported.
@@ -1340,6 +1581,7 @@ fn render(
 
 fn render_objects(
     world: Res<PlayWorld>,
+    track: Res<super::Track>,
     time: Res<Time<Fixed>>,
     mut objects: Query<(&TrackObject, &mut Visibility, &mut Transform)>,
 ) {
@@ -1376,6 +1618,21 @@ fn render_objects(
                 false
             }
         } else {
+            let delta = ssx_rust::object_animation::delta(
+                &track.level,
+                &world.session.objects,
+                object.index,
+                object.part,
+                0.,
+            );
+            // Convert the original Z-up coordinates to the viewer basis.
+            let basis = Mat4::from_cols(
+                Vec4::new(0.01, 0., 0., 0.),
+                Vec4::new(0., 0., -0.01, 0.),
+                Vec4::new(0., 0.01, 0., 0.),
+                Vec4::W,
+            );
+            next = Transform::from_matrix(basis * delta * basis.inverse());
             world
                 .session
                 .objects
@@ -1384,6 +1641,25 @@ fn render_objects(
                 || (object.initially_visible
                     && !world.session.objects.disabled.contains(&object.index))
         };
+        if visible
+            && (world.session.objects.rigid.contains_key(&object.index)
+                || world.session.objects.fragments.contains_key(&object.index))
+        {
+            let original = |p: Vec3| Vec3::new(p.x, -p.z, p.y) * 100.;
+            let a = original(object.bounds[0]);
+            let b = original(object.bounds[1]);
+            let (axis, angle) = next.rotation.to_axis_angle();
+            let rotation = Quat::from_axis_angle(original(axis).normalize_or_zero(), angle);
+            let offset = original(next.translation - object.pivot + next.rotation * object.pivot);
+            let supported = ssx_rust::fragments::ground_offset(
+                &world.terrain,
+                [a.min(b), a.max(b)],
+                original(object.pivot),
+                rotation,
+                offset,
+            );
+            next.translation += super::world((supported - offset).to_array());
+        }
         transform.set_if_neq(next);
         visibility.set_if_neq(if visible {
             Visibility::Inherited

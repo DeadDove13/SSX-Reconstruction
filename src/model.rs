@@ -10,6 +10,7 @@ pub struct ObjectMesh {
     pub indices: Vec<u32>,
     pub material: usize,
     pub transform: Option<[f32; 16]>,
+    pub animation: Option<crate::object_animation::Track>,
     pub bounds: [[f32; 3]; 2],
 }
 
@@ -74,6 +75,15 @@ pub fn decode_mdr(data: &[u8]) -> Result<Vec<ObjectMesh>> {
             indices: vec![],
             material,
             transform,
+            animation: if matrix_offset == 0xdeadbeef {
+                None
+            } else {
+                crate::object_animation::Track::decode(
+                    data,
+                    model_start + matrix_offset as usize,
+                    f32le(data, 12)?,
+                )?
+            },
             bounds: [vec3(data, model_start)?, vec3(data, model_start + 12)?],
         };
         let mut cursor = (model_start + 64 + 127) & !127;
@@ -81,9 +91,7 @@ pub fn decode_mdr(data: &[u8]) -> Result<Vec<ObjectMesh>> {
             let strips = u32le(data, cursor + 48)? as usize;
             let vertices = u32le(data, cursor + 56)? as usize;
             if vertices > 65535 || strips > vertices {
-                return Err(format!(
-                    "Invalid MDR/WDR packet in mesh {mesh_index}"
-                ));
+                return Err(format!("Invalid MDR/WDR packet in mesh {mesh_index}"));
             }
             cursor += 80;
             let mut lengths = Vec::with_capacity(strips);
@@ -120,9 +128,9 @@ pub fn decode_mdr(data: &[u8]) -> Result<Vec<ObjectMesh>> {
             for index in 0..vertices {
                 let mut position = [0.0; 3];
                 for axis in 0..3 {
-                    position[axis] =
-                        (u16le(data, cursor + index * 6 + axis * 2)? as i16) as f32 / 32768.0
-                            * scale[axis];
+                    position[axis] = (u16le(data, cursor + index * 6 + axis * 2)? as i16) as f32
+                        / 32768.0
+                        * scale[axis];
                 }
                 mesh.positions.push(position);
             }

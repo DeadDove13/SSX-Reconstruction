@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod animation_actions;
 pub mod announcer;
 pub mod archive;
 pub mod audio_bank;
@@ -20,6 +21,7 @@ pub mod level;
 pub mod lighting;
 pub mod model;
 pub mod music;
+pub mod object_animation;
 pub mod object_rules;
 #[cfg(feature = "viewer")]
 pub mod opponents;
@@ -34,9 +36,9 @@ pub mod race_path;
 pub mod rails;
 #[cfg(feature = "viewer")]
 pub mod rider_contact;
+pub mod sky;
 pub mod sound_vm;
 pub mod splines;
-pub mod sky;
 pub mod texture;
 pub mod tricks;
 
@@ -72,6 +74,26 @@ pub fn load_track(path: &std::path::Path) -> Result<(level::Level, Vec<texture::
     let mut level = level::decode(&wdx_bytes, &find(".wdf")?)?;
     level.prefabs = model::decode(&wdx_bytes, &find(".wdr")?)?;
     level.effects = object_rules::WorldEffects::decode(&find(".wfx")?)?;
+    if let Ok(map) = find(".map") {
+        let text = String::from_utf8_lossy(&map);
+        let mut names = std::collections::HashMap::new();
+        let mut previous = "";
+        for line in text.lines() {
+            let fields: Vec<_> = line.split_whitespace().collect();
+            if fields.len() == 4 && fields[0] == "TGId:" && fields[2] == "TGIndex:" {
+                if let (Ok(grid), Ok(index)) = (fields[1].parse::<u16>(), fields[3].parse::<u16>())
+                {
+                    names.insert([grid, index], previous.trim().to_string());
+                }
+            }
+            previous = line;
+        }
+        level.object_names = level
+            .instances
+            .iter()
+            .map(|i| names.get(&i.properties.id).cloned().unwrap_or_default())
+            .collect();
+    }
     level.lightmaps = texture::decode(&find("l.ssh")?)?;
     for patch in &level.patches {
         if patch.lightmap as usize >= level.lightmaps.len() {

@@ -5,6 +5,8 @@ use bevy::{
 };
 use ssx_rust::{Result, animation, archive, character, texture};
 use std::{collections::BTreeMap, path::Path};
+#[path = "rider_motion.rs"]
+mod motion;
 #[path = "rider_preview.rs"]
 pub(super) mod preview;
 
@@ -131,16 +133,10 @@ pub fn load(root: &Path) -> Result<Data> {
         });
     }
     let mut tracks = BTreeMap::new();
-    for (bank, name) in [
-        (0, "cmanim"),
-        (1, "bxanim"),
-        (2, "exanim"),
-        (3, "franim"),
-        (4, "genflanim"),
-    ] {
+    for (bank, name) in ssx_rust::animation_actions::BANKS.iter().enumerate() {
         tracks.insert(
             bank,
-            animation::decode(&member(&anims, &format!("/{name}.adf"))?)?,
+            animation::decode(&member(&anims, &format!("/{name}"))?)?,
         );
     }
     println!(
@@ -163,12 +159,9 @@ fn sample(track: &animation::Track, time: f32) -> (Vec3, Vec<Quat>, Option<Vec<V
     let t = (time * track.fps as f32).rem_euclid(track.frames.len() as f32);
     let a = &track.frames[t.floor() as usize];
     let b = &track.frames[(t.floor() as usize + 1) % track.frames.len()];
-    // 0x00147670 does not interpolate tracks that include bone translations.
-    let fraction = if a.bone_positions.is_some() {
-        0.
-    } else {
-        t.fract()
-    };
+    // The PS2 path steps translated tracks. Interpolate local translations too
+    // so character-specific gestures remain smooth at modern render rates.
+    let fraction = t.fract();
     (
         Vec3::from_array(a.position).lerp(Vec3::from_array(b.position), fraction),
         a.rotations
@@ -176,21 +169,69 @@ fn sample(track: &animation::Track, time: f32) -> (Vec3, Vec<Quat>, Option<Vec<V
             .zip(&b.rotations)
             .map(|(&a, &b)| rotation(a).slerp(rotation(b), fraction))
             .collect(),
-        a.bone_positions
-            .as_ref()
-            .map(|p| p.iter().copied().map(Vec3::from_array).collect()),
+        a.bone_positions.as_ref().map(|p| {
+            p.iter()
+                .enumerate()
+                .map(|(i, p)| {
+                    let a = Vec3::from_array(*p);
+                    let b = b
+                        .bone_positions
+                        .as_ref()
+                        .map_or(a, |p| Vec3::from_array(p[i]));
+                    a.lerp(b, fraction)
+                })
+                .collect()
+        }),
     )
 }
 fn palette(data: &Data, rider: usize, bank: usize, clip: usize, time: f32) -> Vec<Mat4> {
-    let body = data.tracks[&bank]
-        .iter()
-        .find(|t| t.header == clip + 1)
-        .unwrap();
-    let board = data.tracks[&bank]
-        .iter()
-        .find(|t| t.header == clip + 2)
-        .unwrap();
-    let (root, angles, positions) = sample(body, time);
+    blended_palette(data, rider, (bank, clip, time), None)
+}
+
+fn blended_palette(
+    data: &Data,
+    rider: usize,
+    (bank, clip, time): (usize, usize, f32),
+    blend: Option<((usize, usize, f32), f32)>,
+) -> Vec<Mat4> {
+    let body = animation::track(&data.tracks[&bank], clip, 0).expect("Body animation");
+    let board = animation::track(&data.tracks[&bank], clip, 1);
+    let (mut root, mut angles, mut positions) = sample(body, time);
+    let mut board_pose = board.map(|board| sample(board, time));
+    if let Some(((bank, clip, time), weight)) = blend {
+        let other = animation::track(&data.tracks[&bank], clip, 0).expect("Blend body animation");
+        let (other_root, other_angles, other_positions) = sample(other, time);
+        let weight = weight.clamp(0., 1.);
+        root = root.lerp(other_root, weight);
+        for (a, b) in angles.iter_mut().zip(other_angles) {
+            *a = a.slerp(b, weight);
+        }
+        if positions.is_some() || other_positions.is_some() {
+            positions = Some(
+                data.riders[rider]
+                    .bones
+                    .iter()
+                    .enumerate()
+                    .map(|(i, bone)| {
+                        let bind = Vec3::from_array(bone.position);
+                        positions
+                            .as_ref()
+                            .map_or(bind, |p| p[i])
+                            .lerp(other_positions.as_ref().map_or(bind, |p| p[i]), weight)
+                    })
+                    .collect(),
+            );
+        }
+        if let Some(other_board) = animation::track(&data.tracks[&bank], clip, 1) {
+            let (p, q, _) = sample(other_board, time);
+            if let Some((position, angles, _)) = &mut board_pose {
+                *position = position.lerp(p, weight);
+                angles[0] = angles[0].slerp(q[0], weight);
+            } else {
+                board_pose = Some((p, q, None));
+            }
+        }
+    }
     let mut out = Vec::new();
     for (i, bone) in data.riders[rider].bones.iter().enumerate() {
         let translation = positions
@@ -206,8 +247,12 @@ fn palette(data: &Data, rider: usize, bank: usize, clip: usize, time: f32) -> Ve
             out[bone.parent as usize] * local
         });
     }
-    let (position, angles, _) = sample(board, time);
-    out.push(Mat4::from_rotation_translation(angles[0], position));
+    if let Some((position, angles, _)) = board_pose {
+        out.push(Mat4::from_rotation_translation(angles[0], position));
+    } else {
+        // Frontend/warmup clips have no board track. Keep its bind pose.
+        out.push(Mat4::IDENTITY);
+    }
     out
 }
 fn skin(source: &character::Mesh, palette: &[Mat4]) -> (Vec<[f32; 3]>, Vec<[f32; 3]>) {
@@ -366,7 +411,8 @@ pub fn animate(
     menu: Res<super::interface::Menu>,
     time: Res<Time<Fixed>>,
     frame: Res<Time>,
-    mut landing_spin: Local<f32>,
+    mut motions: Local<[motion::Motion; 8]>,
+    mut anchors: ResMut<super::presentation::RiderAnchors>,
     library: Res<Library>,
     probes: Res<crate::lighting::Probes>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -375,131 +421,66 @@ pub fn animate(
 ) {
     // State-to-clip selection remains a host adapter.
     let _span = crate::performance::span("riders");
-    if !world.session.grounded {
-        *landing_spin = (world.tricks.spin + 180.).rem_euclid(360.) - 180.;
-    } else {
-        *landing_spin *= (-frame.delta_secs() / 0.075).exp();
-        if landing_spin.abs() < 0.1 {
-            *landing_spin = 0.;
-        }
-    }
-    // All sampled motion comes from the disc.
-    let (bank, clip) = if world.session.phase == super::Phase::Ready {
-        gate_clip(world.session.board_style)
-    } else if world.session.shove.side != 0 {
-        shove_clip(&world.session)
-    } else if let Some(g) = world.tricks.grab {
-        ssx_rust::tricks::GRABS[g].clips[world.tricks.tweak as usize]
-    } else {
-        (
-            1,
-            if !world.session.grounded {
-                360
-            } else if world.controls.brake {
-                519
-            } else if world.session.ground_inputs.crouch.value > 0.1 {
-                if world.controls.steer < 0. { 660 } else { 669 }
-            } else if world.controls.steer < 0. {
-                642
-            } else {
-                651
-            },
-        )
-    };
-    let track = library.data.tracks[&bank]
-        .iter()
-        .find(|t| t.header == clip + 1)
-        .unwrap();
-    let t = if world.session.phase == super::Phase::Ready {
-        gate_fraction(world.session.start_rock.offset) * (track.frames.len() - 1) as f32
-            / track.fps as f32
-    } else if world.session.shove.side != 0 {
-        world.session.shove.fraction() * (track.frames.len() - 1) as f32 / track.fps as f32
-    } else if world.tricks.grab.is_some() {
-        world
-            .tricks
-            .grab_time
-            .min((track.frames.len() - 1) as f32 / track.fps as f32)
-    } else if !world.session.grounded || world.controls.brake {
-        world.session.elapsed
-    } else {
-        world.controls.steer.abs() * (track.frames.len() - 1) as f32 / track.fps as f32
-    };
     let palettes: Vec<_> = (0..8)
         .map(|i| {
-            if i == world.rider {
-                if world.session.recovery.is_some() {
-                    return recovery_palette(&library.data, i, &world.session);
-                }
-                if world.session.phase == super::Phase::Finished
-                    && world.session.grounded
-                    && world.session.recovery.is_none()
-                    && world.session.finish_elapsed >= 3.5
-                {
-                    return finish_palette(
-                        &library.data,
-                        i,
-                        &world.session,
-                        world
-                            .opponents
-                            .iter()
-                            .filter(|o| {
-                                o.session.phase == super::Phase::Finished
-                                    && o.session.elapsed < world.session.elapsed
-                            })
-                            .count()
-                            < 4,
-                    );
-                }
-                palette(&library.data, i, bank, clip, t)
+            let session = if i == world.rider {
+                &world.session
             } else {
-                let opponent = &world.opponents[if i < world.rider { i } else { i - 1 }];
-                if opponent.session.recovery.is_some() {
-                    return recovery_palette(&library.data, i, &opponent.session);
-                }
-                if opponent.session.phase == super::Phase::Finished
-                    && opponent.session.grounded
-                    && opponent.session.recovery.is_none()
-                    && opponent.session.finish_elapsed >= 3.5
-                {
-                    let rank = world
-                        .opponents
-                        .iter()
-                        .filter(|o| {
-                            o.session.phase == super::Phase::Finished
-                                && o.session.elapsed < opponent.session.elapsed
-                        })
-                        .count()
-                        + usize::from(
-                            world.session.phase == super::Phase::Finished
-                                && world.session.elapsed < opponent.session.elapsed,
-                        );
-                    return finish_palette(&library.data, i, &opponent.session, rank < 4);
-                }
-                let (bank, clip) = if opponent.session.phase == super::Phase::Ready {
-                    gate_clip(opponent.session.board_style)
-                } else if opponent.steer < 0. {
-                    (1, 642)
-                } else {
-                    (1, 651)
-                };
-                let track = library.data.tracks[&bank]
+                &world.opponents[if i < world.rider { i } else { i - 1 }].session
+            };
+            let player = i == world.rider;
+            motions[i].tick(
+                session,
+                frame.delta_secs(),
+                if player { world.tricks.spin } else { 0. },
+                session.ground_inputs.steer.value,
+            );
+            if session.phase == super::Phase::Finished
+                && session.grounded
+                && session.recovery.is_none()
+                && session.finish_elapsed >= 3.5
+            {
+                let rank = world
+                    .opponents
                     .iter()
-                    .find(|t| t.header == clip + 1)
-                    .unwrap();
-                palette(
-                    &library.data,
-                    i,
-                    bank,
-                    clip,
-                    (if opponent.session.phase == super::Phase::Ready {
-                        gate_fraction(opponent.session.start_rock.offset)
-                    } else {
-                        opponent.steer.abs()
-                    }) * (track.frames.len() - 1) as f32
-                        / track.fps as f32,
-                )
+                    .filter(|o| {
+                        o.session.phase == super::Phase::Finished
+                            && o.session.elapsed < session.elapsed
+                    })
+                    .count()
+                    + usize::from(
+                        !player
+                            && world.session.phase == super::Phase::Finished
+                            && world.session.elapsed < session.elapsed,
+                    );
+                let target = finish_palette(&library.data, i, session, rank < 4, &mut motions[i]);
+                return motions[i].present(&library.data, i, target, false);
             }
+            motions[i].rotation_inputs(
+                session,
+                if player { world.tricks.spin } else { 0. },
+                if player { world.tricks.flip } else { 0. },
+            );
+            let spin_input = motions[i].spin_input;
+            let flip_input = motions[i].flip_input;
+            let target = motion::gameplay(
+                &library.data,
+                i,
+                session,
+                &mut motions[i],
+                if player { world.tricks.grab } else { None },
+                player && world.tricks.tweak,
+                if player { world.tricks.grab_time } else { 0. },
+                spin_input,
+                flip_input,
+            );
+            let target = motion::apply_stance(&library.data, i, session, target);
+            motions[i].present(
+                &library.data,
+                i,
+                target,
+                session.phase == super::Phase::Paused,
+            )
         })
         .collect();
     let mut lights = [ssx_rust::lighting::Lighting::default(); 8];
@@ -535,9 +516,15 @@ pub fn animate(
                 .lerp(session.position, time.overstep_fraction())
                 .to_array(),
         );
+        let display_forward = if session.grounded {
+            (session.forward - session.normal * session.forward.dot(session.normal))
+                .normalize_or_zero()
+        } else {
+            session.forward
+        };
         transform.rotation = Transform::IDENTITY
             .looking_to(
-                super::super::world(session.forward.to_array()),
+                super::super::world(display_forward.to_array()),
                 super::super::world(session.normal.to_array()).normalize_or_zero(),
             )
             .rotation;
@@ -545,17 +532,29 @@ pub fn animate(
             let rock = session.start_rock.offset;
             transform.translation += super::super::world((session.forward * rock * 32.).to_array());
         }
-        if root.rider == world.rider
-            && session.phase != super::Phase::Finished
-            && session.recovery.is_none()
-        {
-            // Switch remains a physics/scoring stance. Settle the visual pose toward travel.
-            transform.rotation *= Quat::from_rotation_y(landing_spin.to_radians());
-            if !session.grounded {
-                transform.rotation *= Quat::from_rotation_x(world.tricks.flip.to_radians());
-            }
+        if session.phase != super::Phase::Finished || session.finish_elapsed < 3.5 {
+            // Stance changes the visible leading foot, never the travel/camera basis.
+            let flip =
+                if root.rider == world.rider && !session.grounded && session.recovery.is_none() {
+                    world.tricks.flip
+                } else {
+                    0.
+                };
+            transform.rotation *= trick_rotation(motions[root.rider].yaw, flip);
         }
         lights[root.rider] = probes.sample(session.position);
+        let hands: Vec<_> = library.data.riders[root.rider]
+            .bones
+            .iter()
+            .enumerate()
+            .filter(|(_, b)| b.name == "l_hand" || b.name == "r_hand")
+            .map(|(i, _)| {
+                transform.transform_point(super::super::world(
+                    palettes[root.rider][i].w_axis.truncate().to_array(),
+                ))
+            })
+            .collect();
+        anchors.0[root.rider] = hands.try_into().ok();
         rotations[root.rider] = transform.rotation;
     }
     for (mut source, handle, visible) in &mut skins {
@@ -587,31 +586,17 @@ pub fn animate(
     }
 }
 
-fn recovery_palette(data: &Data, rider: usize, session: &super::Session) -> Vec<Mat4> {
-    let recovery = session.recovery.unwrap();
-    let style = session.board_style.clamp(0, 2) as usize;
-    // The original common CC_R roll includes the descent and return to standing.
-    // CC_B/CC_F depend on the original crash-body rotation, which is not ported.
-    // Clip choice and duration remain host adapters.
-    let (bank, clip, fraction) = if recovery.quality == ssx_rust::landing::Quality::Bail {
-        (0, 9, recovery.fraction())
-    } else {
-        ([1, 3, 2][style], 108, recovery.fraction())
+fn finish_palette(
+    data: &Data,
+    rider: usize,
+    session: &super::Session,
+    happy: bool,
+    motion: &mut motion::Motion,
+) -> Vec<Mat4> {
+    let mut pose = |bank, clip, age| {
+        motion.finish_context(bank, clip);
+        palette(data, rider, bank, clip, age)
     };
-    let track = data.tracks[&bank]
-        .iter()
-        .find(|t| t.header == clip + 1)
-        .unwrap();
-    palette(
-        data,
-        rider,
-        bank,
-        clip,
-        fraction * (track.frames.len() - 1) as f32 / track.fps as f32,
-    )
-}
-
-fn finish_palette(data: &Data, rider: usize, session: &super::Session, happy: bool) -> Vec<Mat4> {
     // 0x0013d068: settle (state EC), result reaction, then follow-up loop.
     // 0x279548 / 0x279598 hold the state list and per-rider eligibility masks.
     const MASKS: [u32; 8] = [
@@ -636,35 +621,63 @@ fn finish_palette(data: &Data, rider: usize, session: &super::Session, happy: bo
         (304, 312),
     ];
     let duration = |bank, clip| {
-        let t = data.tracks[&bank]
-            .iter()
-            .find(|t| t.header == clip + 1)
-            .unwrap();
+        let t = animation::track(&data.tracks[&bank], clip, 0).unwrap();
         (t.frames.len() - 1) as f32 / t.fps as f32
     };
     let (bank, settle) = [(1, 153), (3, 153), (2, 156)][session.board_style.clamp(0, 2) as usize];
     let mut time = session.finish_elapsed - 3.5;
     if time < duration(bank, settle) {
-        return palette(data, rider, bank, settle, time);
+        return pose(bank, settle, time);
     }
     time -= duration(bank, settle);
+    // Each rider has authored finish gestures in addition to the shared bank.
+    let character_bank = [11, 20, 14, 27, 24, 30, 17, 8][rider];
+    let character_clips: Vec<_> = data.tracks[&character_bank]
+        .iter()
+        .filter(|t| t.model == 0)
+        .map(|t| t.group)
+        .collect();
+    let intro = character_clips[0];
+    if happy && time < duration(character_bank, intro) {
+        return pose(character_bank, intro, time);
+    }
+    if happy {
+        time -= duration(character_bank, intro);
+    }
+    // FLC/FLD groups are the rider's three celebration/disappointment variants.
+    // Follow the gesture with the shared result loop instead of freezing its
+    // final frame while the other riders finish.
+    let personal: Vec<_> = data.tracks[&character_bank]
+        .iter()
+        .filter(|t| t.model == 0 && t.name == if happy { "FLC_" } else { "FLD_" })
+        .map(|t| t.group)
+        .collect();
+    if !personal.is_empty() {
+        let clip = personal[(session.resets as usize + rider) % personal.len()];
+        let length = duration(character_bank, clip);
+        if time < length {
+            return pose(character_bank, clip, time);
+        }
+        time -= length;
+    }
     let choices: Vec<_> = (if happy { 0..7 } else { 7..16 })
         .filter(|i| MASKS[rider] & (1 << i) != 0)
         .collect();
     let selected = choices[(session.resets as usize + rider) % choices.len()];
     let (reaction, idle) = CLIPS[selected];
     if time < duration(4, reaction) {
-        palette(data, rider, 4, reaction, time)
+        pose(4, reaction, time)
     } else {
-        palette(data, rider, 4, idle, time - duration(4, reaction))
+        pose(4, idle, time - duration(4, reaction))
     }
 }
 
-// Animation state 2 -> action 57 at 0x2ac2d8. Packed style entries at
-// 0x279920 + 57*6 select the original start-gate body and board tracks.
-fn gate_clip(style: i32) -> (usize, usize) {
-    [(1, 189), (3, 189), (2, 201)][style.clamp(0, 2) as usize]
+fn trick_rotation(yaw: f32, flip: f32) -> Quat {
+    // Flip about the travel frame's lateral axis. Applying it after stance yaw
+    // in local space reverses forward/backward when the rider is switch.
+    Quat::from_rotation_x(flip.to_radians()) * Quat::from_rotation_y(yaw.to_radians())
 }
+
 fn gate_fraction(offset: f32) -> f32 {
     (0.5 - offset * 0.5).clamp(0., 1.)
 }
@@ -684,6 +697,132 @@ fn shove_clip(session: &super::Session) -> (usize, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn forward_flip_keeps_travel_direction_when_riding_switch() {
+        for flip in [-60., -30., 30., 60.] {
+            let regular = trick_rotation(0., flip) * Vec3::Y;
+            let switch = trick_rotation(180., flip) * Vec3::Y;
+            assert!(
+                regular.abs_diff_eq(switch, 0.0001),
+                "Switch inverted the flip direction"
+            );
+        }
+    }
+    #[test]
+    #[ignore = "requires the original disc"]
+    fn crouched_riding_pose_responds_to_speed() {
+        let data = load(Path::new("extracted/DATA")).unwrap();
+        let path = Path::new("extracted/DATA/MODELS/SNOW.BIG");
+        let (level, _) = ssx_rust::load_track(path).unwrap();
+        let terrain = ssx_rust::playtest::TerrainContact::from_level(&level);
+        let mut session =
+            ssx_rust::playtest::Session::new(ssx_rust::load_track_paths(path).unwrap(), &terrain)
+                .unwrap();
+        session.phase = ssx_rust::playtest::Phase::Running;
+        session.ground_inputs.crouch.value = 1.;
+        session.elapsed = 5.;
+        let motion = motion::Motion::default();
+        for style in 0..3 {
+            session.board_style = style;
+            session.velocity = Vec3::ZERO;
+            let slow = motion::riding(&data, 0, &session, &motion);
+            session.velocity = Vec3::Y * 3000.;
+            let fast = motion::riding(&data, 0, &session, &motion);
+            let difference: f32 = slow
+                .iter()
+                .zip(fast)
+                .map(|(a, b)| {
+                    a.to_cols_array()
+                        .iter()
+                        .zip(b.to_cols_array())
+                        .map(|(a, b)| (a - b).abs())
+                        .sum::<f32>()
+                })
+                .sum();
+            assert!(
+                difference > 1.,
+                "style {style}: standing and high-speed tuck use the same pose"
+            );
+        }
+    }
+    #[test]
+    #[ignore = "requires the original disc"]
+    fn complete_original_animation_catalog_has_valid_groups_and_poses() {
+        let data = load(Path::new("extracted/DATA")).unwrap();
+        assert_eq!(data.tracks.len(), 34);
+        for action in 0..ssx_rust::animation_actions::ACTIONS.len() {
+            for style in 0..3 {
+                let (bank, clip) = animation::action(action, style);
+                assert!(
+                    data.tracks[&bank].iter().any(|t| t.group == clip),
+                    "Missing action {action}, style {style}, bank {bank}, descriptor {clip}"
+                );
+            }
+        }
+        let mut body_clips = 0;
+        for (&bank, tracks) in &data.tracks {
+            for body in tracks.iter().filter(|t| t.model == 0) {
+                body_clips += 1;
+                assert_eq!(body.frames[0].rotations.len(), 19);
+                for frame in [0, body.frames.len() / 2, body.frames.len() - 1] {
+                    for rider in 0..8 {
+                        let p = palette(
+                            &data,
+                            rider,
+                            bank,
+                            body.group,
+                            frame as f32 / body.fps as f32,
+                        );
+                        assert!(
+                            p.iter().all(|m| m.is_finite()),
+                            "Bank {bank}, group {}, rider {rider}",
+                            body.group
+                        );
+                    }
+                }
+            }
+        }
+        println!(
+            "Validated {} states, {} actions, {body_clips} body clips across 34 banks",
+            ssx_rust::animation_actions::STATES.len(),
+            ssx_rust::animation_actions::ACTIONS.len()
+        );
+    }
+
+    #[test]
+    #[ignore = "requires the original disc"]
+    fn switch_stance_survives_landing_and_the_next_jump() {
+        let path = Path::new("extracted/DATA/MODELS/SNOW.BIG");
+        let (level, _) = ssx_rust::load_track(path).unwrap();
+        let terrain = ssx_rust::playtest::TerrainContact::from_level(&level);
+        let mut session =
+            super::super::Session::new(ssx_rust::load_track_paths(path).unwrap(), &terrain)
+                .unwrap();
+        session.phase = super::super::Phase::Running;
+        let mut motion = motion::Motion::default();
+        motion.tick(&session, 1. / 60., 0., 0.);
+        session.grounded = false;
+        motion.tick(&session, 1. / 60., 180., 0.);
+        assert_eq!(motion.yaw, 180.);
+        session.landed_this_tick = true;
+        session.grounded = true;
+        session.finish_air_trick(180., 0.);
+        let forward = session.forward;
+        for _ in 0..60 {
+            motion.tick(&session, 1. / 60., 0., 0.);
+        }
+        assert!((motion.yaw - 180.).abs() < 0.01);
+        assert_eq!(session.forward, forward);
+        session.grounded = false;
+        motion.tick(&session, 1. / 60., 0., 0.);
+        assert_eq!(motion.yaw, 180.);
+        motion.tick(&session, 1. / 60., 180., 0.);
+        session.grounded = true;
+        session.finish_air_trick(180., 0.);
+        motion.tick(&session, 1. / 60., 0., 0.);
+        assert!(!session.riding_switch);
+        assert!(motion.yaw.rem_euclid(360.).abs() < 0.01);
+    }
     #[test]
     #[ignore = "requires the original disc"]
     fn all_riders_and_grabs_skin_to_finite_geometry() {

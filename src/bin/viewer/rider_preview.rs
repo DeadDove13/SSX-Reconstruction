@@ -51,6 +51,8 @@ pub fn spawn(
 
 fn frontend_palette(data: &Data, rider: usize, time: f32) -> Vec<Mat4> {
     let r = &data.riders[rider];
+    // Selection confirmations and result gestures need their own events.
+    // Browsing the menu plays only the authored frontend idle.
     let track = r
         .frontend
         .iter()

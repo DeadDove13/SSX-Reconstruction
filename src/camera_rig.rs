@@ -1,6 +1,6 @@
 //! Host camera clearance. The original CM2 follower supplies the desired pose.
 use crate::collision::CollisionWorld;
-use bevy::math::Vec3;
+use bevy::math::{Quat, Vec3};
 use std::collections::HashSet;
 
 #[derive(Default)]
@@ -8,9 +8,23 @@ pub struct Clearance {
     distance: Option<f32>,
     correction: Vec3,
     previous_offset: Option<Vec3>,
+    framing: Option<Quat>,
 }
 
 impl Clearance {
+    /// Adjust framing when terrain moves the camera away from its follow pose.
+    pub fn frame_rotation(&mut self, follow: Quat, facing: Quat, displaced: bool, dt: f32) -> Quat {
+        let required = if displaced {
+            follow.inverse() * facing
+        } else {
+            Quat::IDENTITY
+        };
+        let correction = self.framing.map_or(required, |previous| {
+            previous.slerp(required, 1. - (-dt / 0.18).exp())
+        });
+        self.framing = Some(correction);
+        (follow * correction).normalize()
+    }
     /// Retract immediately at a blocker, then extend smoothly when it clears.
     /// Cast after interpolation and smoothing so neither can cross terrain.
     pub fn constrain(
@@ -62,14 +76,18 @@ impl Clearance {
         // A collision must never select a longer camera preset.
         projected = target + (projected - target).clamp_length_max(pole.length());
         let required = projected - desired;
-        // Apply more clearance immediately. Ease back only after the bank clears.
-        if required.length_squared() >= self.correction.length_squared()
-            || required.dot(self.correction) < 0.
-        {
-            self.correction = required;
+        // Ease between clearance solutions, including the bank search angles.
+        // The final sphere cast still retracts immediately if the eased pose
+        // is blocked. A larger correction alone does not require a camera snap.
+        if self.previous_offset.is_some() {
+            if required.length_squared() < self.correction.length_squared() {
+                let previous = target + self.previous_offset.unwrap();
+                self.correction = previous.lerp(projected, 1. - (-dt / 0.3).exp()) - desired;
+            } else {
+                self.correction = self.correction.lerp(required, 1. - (-dt / 0.18).exp());
+            }
         } else {
-            let previous = target + self.previous_offset.unwrap_or(desired - target);
-            self.correction = previous.lerp(projected, 1. - (-dt / 0.3).exp()) - desired;
+            self.correction = required;
         }
         let desired = desired + self.correction;
         let safe = geometry.camera_position(target, desired, radius, disabled);
@@ -96,6 +114,63 @@ impl Clearance {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn collision_framing_enters_and_leaves_without_a_rotation_snap() {
+        for hz in [30., 60., 144.] {
+            let mut clearance = Clearance::default();
+            let follow = Quat::IDENTITY;
+            let facing = Quat::from_rotation_x(0.7);
+            let mut previous = clearance.frame_rotation(follow, facing, false, 1. / hz);
+            for displaced in [true, false] {
+                for _ in 0..(hz as usize) {
+                    let actual = clearance.frame_rotation(follow, facing, displaced, 1. / hz);
+                    assert!(
+                        actual.angle_between(previous) < 4. / hz,
+                        "Framing snapped at {hz} Hz"
+                    );
+                    previous = actual;
+                }
+                let expected = if displaced { facing } else { follow };
+                assert!(previous.angle_between(expected) < 0.01);
+            }
+        }
+    }
+    #[test]
+    fn passing_a_bank_does_not_snap_between_clearance_angles() {
+        let mut geometry = CollisionWorld::default();
+        for t in [
+            [[-1000., -90., 0.], [1000., -90., 0.], [1000., -90., 220.]],
+            [
+                [-1000., -90., 0.],
+                [1000., -90., 220.],
+                [-1000., -90., 220.],
+            ],
+        ] {
+            geometry.add(t.map(Vec3::from_array), None);
+        }
+        let mut clearance = Clearance::default();
+        let mut previous = None;
+        let mut largest_step = 0f32;
+        for frame in 0..360 {
+            let target = Vec3::new(0., 650. - frame as f32 * 1.5, 120.);
+            let desired = target + Vec3::new(0., -500., 100.);
+            let safe =
+                clearance.constrain(&geometry, target, desired, 20., &HashSet::new(), 1. / 60.);
+            assert!(
+                geometry
+                    .sweep(target, safe - target, 19., &HashSet::new(), &HashSet::new())
+                    .is_none()
+            );
+            if let Some(old) = previous {
+                largest_step = largest_step.max(safe.distance(old));
+            }
+            previous = Some(safe);
+        }
+        assert!(
+            largest_step < 20.,
+            "Camera jumped {largest_step} cm in one frame"
+        );
+    }
     #[test]
     fn small_near_preset_obstruction_does_not_extend_camera_to_far_preset() {
         let mut geometry = CollisionWorld::default();
